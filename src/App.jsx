@@ -1,6 +1,6 @@
 import "./App.css";
 import { useState } from "react";
-import { Heading, Card, CardBody, Flex } from "@chakra-ui/react";
+import { Heading, Card, CardBody, Flex, Container } from "@chakra-ui/react";
 import Selector from "./Selector";
 import CalendarioTable from "./CalendarioTable";
 
