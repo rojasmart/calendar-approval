@@ -1,12 +1,12 @@
 import "./App.css";
-import { Text } from "@chakra-ui/react";
+import { Card } from "@chakra-ui/react";
 
 function App() {
   return (
     <>
-      <Text textStyle="7xl">
+      <Card textStyle="7xl">
         <p>Chakra UI</p>
-      </Text>
+      </Card>
     </>
   );
 }
