@@ -1,11 +1,26 @@
 import "./App.css";
-import { Card } from "@chakra-ui/react";
+import { Heading, Card, CardBody, Flex } from "@chakra-ui/react";
+import Selector from "./Selector";
 
 function App() {
   return (
     <>
-      <Card textStyle="7xl">
-        <p>Chakra UI</p>
+      <Heading as="h2" size="md">
+        Aprovações de Férias
+      </Heading>
+      <Card mt="5" p="2">
+        <CardBody display="flex" flexDirection="column">
+          <Selector />
+          <Flex>
+            {/* <CalendarTable
+              funcionarios={funcionariosFiltrados}
+              selectedMonth={month}
+              selectedYear={year}
+              feriasFaltas={feriasFaltas}
+              feriasPorAprovar={feriasPorAprovar}
+            /> */}
+          </Flex>
+        </CardBody>
       </Card>
     </>
   );
