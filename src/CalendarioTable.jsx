@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 
 import {
   Tag,
@@ -35,178 +35,180 @@ const monthMap = {
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-const CalendarioCells = React.memo(({ month, setHoveredMonth, funcionarioId, feriasFaltas, feriasPorAprovar }) => {
-  const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
+const CalendarioCells = React.memo(
+  ({ month, setHoveredMonth, funcionarioId, feriasFaltas, feriasPorAprovar, setDayClicked, setMonthClicked, setFuncionarioIdClicked }) => {
+    const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
 
-  console.log("funcionarioId", funcionarioId);
+    const memoizedMatches = useMemo(() => {
+      return days.map((day) => {
+        const isApproved =
+          feriasFaltas &&
+          feriasFaltas.some((faltas) => {
+            const dataInicio = new Date(faltas.dataInicio);
+            const dayInicio = dataInicio.getDate();
+            const monthInicio = dataInicio.getMonth() + 1;
+            return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
+          });
 
-  const memoizedMatches = useMemo(() => {
-    return days.map((day) => {
-      const isApproved =
-        feriasFaltas &&
-        feriasFaltas.some((faltas) => {
-          const dataInicio = new Date(faltas.dataInicio);
-          const dayInicio = dataInicio.getDate();
-          const monthInicio = dataInicio.getMonth() + 1;
-          return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
+        const isPending =
+          feriasPorAprovar &&
+          feriasPorAprovar.some((faltas) => {
+            const dataInicio = new Date(faltas.dataInicio);
+            const dayInicio = dataInicio.getDate();
+            const monthInicio = dataInicio.getMonth() + 1;
+            return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
+          });
+
+        return { isApproved, isPending };
+      });
+    }, [feriasFaltas, feriasPorAprovar, funcionarioId, month]);
+
+    const handleMouseEnter = useCallback(
+      (e) => {
+        const cell = e.target;
+        const row = cell.parentElement;
+        const table = row.parentElement.parentElement;
+        const columnIndex = Array.from(row.children).indexOf(cell);
+
+        const isMatch = cell.getAttribute("data-original-color") === "green" || cell.getAttribute("data-original-color") === "yellow";
+
+        if (isMatch) {
+          cell.style.backgroundColor = "red";
+        }
+
+        Array.from(row.children).forEach((td, index) => {
+          if (index !== columnIndex && !td.hasAttribute("data-original-color")) {
+            td.style.backgroundColor = "#f5f5f5";
+          }
         });
 
-      const isPending =
-        feriasPorAprovar &&
-        feriasPorAprovar.some((faltas) => {
-          const dataInicio = new Date(faltas.dataInicio);
-          const dayInicio = dataInicio.getDate();
-          const monthInicio = dataInicio.getMonth() + 1;
-          return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
+        const headerRow = table.querySelector("thead tr:nth-child(2)");
+        if (headerRow && headerRow.children[columnIndex]) {
+          headerRow.children[columnIndex].classList.add("bold-day");
+        }
+
+        setHoveredMonth(month);
+
+        const monthHeader = table.querySelector(`.header-names-months.${month}`);
+        if (monthHeader) {
+          monthHeader.classList.add("hovered");
+        }
+      },
+      [setHoveredMonth, month]
+    );
+
+    const handleMouseLeave = useCallback(
+      (e) => {
+        const cell = e.target;
+        const row = cell.parentElement;
+        const table = row.parentElement.parentElement;
+        const columnIndex = Array.from(row.children).indexOf(cell);
+
+        cell.style.backgroundColor = cell.getAttribute("data-original-color");
+
+        Array.from(row.children).forEach((td, index) => {
+          if (index !== columnIndex) {
+            td.style.backgroundColor = td.getAttribute("data-original-color");
+          }
         });
 
-      return { isApproved, isPending };
-    });
-  }, [feriasFaltas, feriasPorAprovar, funcionarioId, month]);
+        Array.from(table.rows).forEach((tr) => {
+          if (tr.children[columnIndex] && tr !== row) {
+            tr.children[columnIndex].style.backgroundColor = tr.children[columnIndex].getAttribute("data-original-color");
+          }
+        });
 
-  const handleMouseEnter = useCallback(
-    (e) => {
-      const cell = e.target;
-      const row = cell.parentElement;
-      const table = row.parentElement.parentElement;
-      const columnIndex = Array.from(row.children).indexOf(cell);
-
-      const isMatch = cell.getAttribute("data-original-color") === "green" || cell.getAttribute("data-original-color") === "yellow";
-
-      if (isMatch) {
-        cell.style.backgroundColor = "red";
-      }
-
-      Array.from(row.children).forEach((td, index) => {
-        if (index !== columnIndex && !td.hasAttribute("data-original-color")) {
-          td.style.backgroundColor = "#f5f5f5";
+        const headerRow = table.querySelector("thead tr:nth-child(2)");
+        if (headerRow && headerRow.children[columnIndex]) {
+          headerRow.children[columnIndex].classList.remove("bold-day");
         }
-      });
 
-      const headerRow = table.querySelector("thead tr:nth-child(2)");
-      if (headerRow && headerRow.children[columnIndex]) {
-        headerRow.children[columnIndex].classList.add("bold-day");
-      }
+        setHoveredMonth(null);
 
-      setHoveredMonth(month);
-
-      const monthHeader = table.querySelector(`.header-names-months.${month}`);
-      if (monthHeader) {
-        monthHeader.classList.add("hovered");
-      }
-    },
-    [setHoveredMonth, month]
-  );
-
-  const handleMouseLeave = useCallback(
-    (e) => {
-      const cell = e.target;
-      const row = cell.parentElement;
-      const table = row.parentElement.parentElement;
-      const columnIndex = Array.from(row.children).indexOf(cell);
-
-      cell.style.backgroundColor = cell.getAttribute("data-original-color");
-
-      Array.from(row.children).forEach((td, index) => {
-        if (index !== columnIndex) {
-          td.style.backgroundColor = td.getAttribute("data-original-color");
+        const monthHeader = table.querySelector(`.header-names-months.${month}`);
+        if (monthHeader) {
+          monthHeader.classList.remove("hovered");
         }
-      });
+      },
+      [setHoveredMonth, month]
+    );
 
-      Array.from(table.rows).forEach((tr) => {
-        if (tr.children[columnIndex] && tr !== row) {
-          tr.children[columnIndex].style.backgroundColor = tr.children[columnIndex].getAttribute("data-original-color");
-        }
-      });
+    const handleAprovarClick = (day, funcionarioId) => {
+      setDayClicked(day);
+      setMonthClicked(month);
+      setFuncionarioIdClicked(funcionarioId);
+    };
 
-      const headerRow = table.querySelector("thead tr:nth-child(2)");
-      if (headerRow && headerRow.children[columnIndex]) {
-        headerRow.children[columnIndex].classList.remove("bold-day");
-      }
+    return (
+      <>
+        {days.map((day, index) => {
+          const { isApproved, isPending } = memoizedMatches[index];
+          const originalColor = isApproved ? "green" : isPending ? "yellow" : "";
 
-      setHoveredMonth(null);
-
-      const monthHeader = table.querySelector(`.header-names-months.${month}`);
-      if (monthHeader) {
-        monthHeader.classList.remove("hovered");
-      }
-    },
-    [setHoveredMonth, month]
-  );
-
-  const handleAprovarClick = (day) => {
-    console.log(day, month);
-  };
-
-  return (
-    <>
-      {days.map((day, index) => {
-        const { isApproved, isPending } = memoizedMatches[index];
-        const originalColor = isApproved ? "green" : isPending ? "yellow" : "";
-
-        return (
-          <td
-            key={`${month}-${day}`}
-            style={{
-              minWidth: "40px",
-              fontSize: "12px",
-              textAlign: "center",
-              padding: "2px 5px",
-              border: "1px solid #e9e9e9",
-              boxSizing: "border-box",
-              color: isApproved || isPending ? "white" : "",
-              cursor: "pointer",
-              backgroundColor: originalColor,
-            }}
-            data-original-color={originalColor}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            {isApproved || isPending ? (
-              <>
-                {isApproved && day}
-                {isPending && (
-                  <Popover isOpen={openPopoverIndex === index} onClose={() => setOpenPopoverIndex(null)} placement="right" closeOnBlur={false}>
-                    <PopoverTrigger onClick={() => setOpenPopoverIndex(index)}>
-                      <div onClick={() => setOpenPopoverIndex(index)}>{day}</div>
-                    </PopoverTrigger>
-                    <PopoverContent color="black">
-                      <PopoverArrow />
-                      <PopoverCloseButton />
-                      <PopoverHeader>
-                        <Heading fontSize="lg">Confirmação</Heading>
-                      </PopoverHeader>
-                      <PopoverBody>
-                        <Text fontSize="sm">Tem a certeza que isto e aquilo</Text>
-                      </PopoverBody>
-                      <PopoverFooter>
-                        <ButtonGroup size="sm">
-                          <Button
-                            mt="2"
-                            size="xs"
-                            colorScheme="green"
-                            onClick={() => {
-                              handleAprovarClick(day);
-                            }}
-                          >
-                            Aprovar
-                          </Button>
-                          <Button mt="2" size="xs" colorScheme="red" onClick={() => {}}>
-                            Rejeitar
-                          </Button>
-                        </ButtonGroup>
-                      </PopoverFooter>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              </>
-            ) : null}
-          </td>
-        );
-      })}
-    </>
-  );
-});
+          return (
+            <td
+              key={`${month}-${day}`}
+              style={{
+                minWidth: "40px",
+                fontSize: "12px",
+                textAlign: "center",
+                padding: "2px 5px",
+                border: "1px solid #e9e9e9",
+                boxSizing: "border-box",
+                color: isApproved || isPending ? "white" : "",
+                cursor: "pointer",
+                backgroundColor: originalColor,
+              }}
+              data-original-color={originalColor}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {isApproved || isPending ? (
+                <>
+                  {isApproved && day}
+                  {isPending && (
+                    <Popover isOpen={openPopoverIndex === index} onClose={() => setOpenPopoverIndex(null)} placement="right" closeOnBlur={false}>
+                      <PopoverTrigger onClick={() => setOpenPopoverIndex(index)}>
+                        <div onClick={() => setOpenPopoverIndex(index)}>{day}</div>
+                      </PopoverTrigger>
+                      <PopoverContent color="black">
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverHeader>
+                          <Heading fontSize="lg">Confirmação</Heading>
+                        </PopoverHeader>
+                        <PopoverBody>
+                          <Text fontSize="sm">Tem a certeza que isto e aquilo</Text>
+                        </PopoverBody>
+                        <PopoverFooter>
+                          <ButtonGroup size="sm">
+                            <Button
+                              mt="2"
+                              size="xs"
+                              colorScheme="green"
+                              onClick={() => {
+                                handleAprovarClick(day, funcionarioId);
+                              }}
+                            >
+                              Aprovar
+                            </Button>
+                            <Button mt="2" size="xs" colorScheme="red" onClick={() => {}}>
+                              Rejeitar
+                            </Button>
+                          </ButtonGroup>
+                        </PopoverFooter>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </>
+              ) : null}
+            </td>
+          );
+        })}
+      </>
+    );
+  }
+);
 
 CalendarioCells.displayName = "CalendarCells";
 
@@ -217,6 +219,19 @@ const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear,
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+
+  //Approved day and month
+  const [dayClicked, setDayClicked] = useState(null);
+  const [monthClicked, setMonthClicked] = useState(null);
+  const [funcionarioIdClicked, setFuncionarioIdClicked] = useState(null);
+  const [clickedList, setClickedList] = useState([]);
+
+  useEffect(() => {
+    if (dayClicked && monthClicked && funcionarioIdClicked) {
+      const funcionario = funcionarios.find((f) => f.id === funcionarioIdClicked);
+      setClickedList((prevList) => [...prevList, { day: dayClicked, month: monthClicked, funcionario: funcionario.nomeAbreviado }]);
+    }
+  }, [dayClicked, monthClicked]);
 
   const handleMouseDown = useCallback((e) => {
     setIsDragging(true);
@@ -238,6 +253,10 @@ const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear,
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
+
+  const handleRemoveItemList = (index) => {
+    setClickedList((prevList) => prevList.filter((_, i) => i !== index));
+  };
 
   const filteredMonths = useMemo(() => (selectedMonth === "Todos" ? months : [selectedMonth]), [selectedMonth]);
   const filteredFaltas = useMemo(
@@ -316,12 +335,31 @@ const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear,
                     feriasFaltas={filteredFaltas}
                     feriasPorAprovar={filteredPorAprovar}
                     funcionarioId={funcionario.id}
+                    setDayClicked={setDayClicked}
+                    setMonthClicked={setMonthClicked}
+                    setFuncionarioIdClicked={setFuncionarioIdClicked}
                   />
                 ))}
               </tr>
             ))}
         </tbody>
       </table>
+      {clickedList.length > 0 && (
+        <table>
+          <tbody>
+            {clickedList.map((item, index) => (
+              <tr key={`${item.day}-${item.month}-${item.funcionario}`}>
+                <td>{item.day}</td>
+                <td>{item.month}</td>
+                <td>{item.funcionario}</td>
+                <td>
+                  <button onClick={() => handleRemoveItemList(index)}>Remover</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 });
