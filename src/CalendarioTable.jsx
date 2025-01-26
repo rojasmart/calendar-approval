@@ -15,6 +15,10 @@ import {
   ButtonGroup,
   Heading,
   Box,
+  Table,
+  Tbody,
+  Tr,
+  Td,
 } from "@chakra-ui/react";
 
 const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -345,20 +349,22 @@ const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear,
         </tbody>
       </table>
       {clickedList.length > 0 && (
-        <table>
-          <tbody>
+        <Table variant="simple" size="sm" mt="4">
+          <Tbody>
             {clickedList.map((item, index) => (
-              <tr key={`${item.day}-${item.month}-${item.funcionario}`}>
-                <td>{item.day}</td>
-                <td>{item.month}</td>
-                <td>{item.funcionario}</td>
-                <td>
-                  <button onClick={() => handleRemoveItemList(index)}>Remover</button>
-                </td>
-              </tr>
+              <Tr key={`${item.day}-${item.month}-${item.funcionario}`}>
+                <Td>{item.day}</Td>
+                <Td>{item.month}</Td>
+                <Td>{item.funcionario}</Td>
+                <Td>
+                  <Button size="xs" colorScheme="red" onClick={() => handleRemoveItemList(index)}>
+                    Remover
+                  </Button>
+                </Td>
+              </Tr>
             ))}
-          </tbody>
-        </table>
+          </Tbody>
+        </Table>
       )}
     </div>
   );
