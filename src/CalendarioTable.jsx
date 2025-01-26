@@ -14,6 +14,7 @@ import {
   Button,
   ButtonGroup,
   Heading,
+  Box,
 } from "@chakra-ui/react";
 
 const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -287,16 +288,23 @@ const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear,
           {funcionarios
             .filter((f) => !f.inativo)
             .map((funcionario) => (
-              <tr key={funcionario.id} style={{ lineHeight: "2", padding: "2px 0", userSelect: "none" }}>
-                <td className="funcionario-names" style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-                  <input type="checkbox" style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }} />
-                  <p style={{ fontSize: "12px" }}>{funcionario.nomeAbreviado}</p>
-                  <Tag ml="2" size="sm" colorScheme="green">
-                    10
-                  </Tag>
-                  <Tag ml="2" size="sm" colorScheme="blue">
-                    10
-                  </Tag>
+              <tr key={funcionario.id} style={{ lineHeight: "3", padding: "2px 0", userSelect: "none" }}>
+                <td
+                  className="funcionario-names"
+                  style={{ display: "flex", alignItems: "center", userSelect: "none", justifyContent: "space-between" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <input type="checkbox" style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }} />
+                    <p style={{ fontSize: "12px" }}>{funcionario.nomeAbreviado}</p>
+                  </div>
+                  <Box display="flex" alignItems="center" marginRight="20px">
+                    <Tag ml="2" size="sm" colorScheme="green">
+                      10
+                    </Tag>
+                    <Tag ml="2" size="sm" colorScheme="blue">
+                      10
+                    </Tag>
+                  </Box>
                 </td>
                 {filteredMonths.map((month) => (
                   <CalendarioCells
