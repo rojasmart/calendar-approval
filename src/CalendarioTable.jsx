@@ -38,6 +38,8 @@ const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const CalendarioCells = React.memo(({ month, setHoveredMonth, funcionarioId, feriasFaltas, feriasPorAprovar }) => {
   const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
 
+  console.log("funcionarioId", funcionarioId);
+
   const memoizedMatches = useMemo(() => {
     return days.map((day) => {
       const isApproved =
@@ -146,7 +148,7 @@ const CalendarioCells = React.memo(({ month, setHoveredMonth, funcionarioId, fer
           <td
             key={`${month}-${day}`}
             style={{
-              minWidth: "30px",
+              minWidth: "40px",
               fontSize: "12px",
               textAlign: "center",
               padding: "2px 5px",
