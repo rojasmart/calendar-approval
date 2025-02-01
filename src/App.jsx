@@ -18,6 +18,7 @@ import {
   Button,
   ButtonGroup,
   IconButton,
+  Text,
 } from "@chakra-ui/react";
 
 import { normalizeName } from "./Utils";

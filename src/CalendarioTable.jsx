@@ -257,6 +257,8 @@ const CalendarioTable = React.memo(
       );
     }, []);
 
+    console.log("funcionarios", funcionarios);
+
     useEffect(() => {
       setLoading(true);
       const timer = setTimeout(() => {
