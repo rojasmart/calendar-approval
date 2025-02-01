@@ -1,5 +1,7 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 
+import { normalizeName } from "./Utils";
+
 import {
   Tag,
   Popover,
@@ -14,12 +16,13 @@ import {
   Button,
   ButtonGroup,
   Heading,
+  Flex,
+  Spinner,
   Box,
-  Table,
-  Tbody,
-  Tr,
-  Td,
+  IconButton,
 } from "@chakra-ui/react";
+
+import { CheckCircleIcon, NotAllowedIcon } from "@chakra-ui/icons";
 
 const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const monthMap = {
@@ -39,15 +42,16 @@ const monthMap = {
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-const CalendarioCells = React.memo(
-  ({ month, setHoveredMonth, funcionarioId, feriasFaltas, feriasPorAprovar, setDayClicked, setMonthClicked, setFuncionarioIdClicked }) => {
+const CalendarCells = React.memo(
+  ({ month, setHoveredMonth, funcionarioId, filteredAprovadas, filteredPorAprovar, setDayClicked, setMonthClicked, setFuncionarioIdClicked }) => {
     const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
+    const [approvedDays, setApprovedDays] = useState([]);
 
     const memoizedMatches = useMemo(() => {
       return days.map((day) => {
         const isApproved =
-          feriasFaltas &&
-          feriasFaltas.some((faltas) => {
+          filteredAprovadas &&
+          filteredAprovadas.some((faltas) => {
             const dataInicio = new Date(faltas.dataInicio);
             const dayInicio = dataInicio.getDate();
             const monthInicio = dataInicio.getMonth() + 1;
@@ -55,8 +59,9 @@ const CalendarioCells = React.memo(
           });
 
         const isPending =
-          feriasPorAprovar &&
-          feriasPorAprovar.some((faltas) => {
+          !isApproved &&
+          filteredPorAprovar &&
+          filteredPorAprovar.some((faltas) => {
             const dataInicio = new Date(faltas.dataInicio);
             const dayInicio = dataInicio.getDate();
             const monthInicio = dataInicio.getMonth() + 1;
@@ -65,7 +70,7 @@ const CalendarioCells = React.memo(
 
         return { isApproved, isPending };
       });
-    }, [feriasFaltas, feriasPorAprovar, funcionarioId, month]);
+    }, [filteredAprovadas, filteredPorAprovar, funcionarioId, month]);
 
     const handleMouseEnter = useCallback(
       (e) => {
@@ -137,23 +142,29 @@ const CalendarioCells = React.memo(
       [setHoveredMonth, month]
     );
 
-    const handleAprovarClick = (day, funcionarioId) => {
+    const handleAprovarClick = (day) => {
       setDayClicked(day);
       setMonthClicked(month);
       setFuncionarioIdClicked(funcionarioId);
+      setOpenPopoverIndex(null);
+
+      //Logic for approving day cell blocked
+      setApprovedDays((prevApprovedDays) => [...prevApprovedDays, { day, month, funcionarioId }]);
     };
 
     return (
       <>
         {days.map((day, index) => {
           const { isApproved, isPending } = memoizedMatches[index];
-          const originalColor = isApproved ? "green" : isPending ? "yellow" : "";
-
+          const isDayToApprove = approvedDays.some(
+            (approvedDay) => approvedDay.day === day && approvedDay.month === month && approvedDay.funcionarioId === funcionarioId
+          );
+          const originalColor = isDayToApprove ? "orange" : isApproved ? "green" : isPending ? "yellow" : "";
           return (
             <td
               key={`${month}-${day}`}
               style={{
-                minWidth: "40px",
+                minWidth: "30px",
                 fontSize: "12px",
                 textAlign: "center",
                 padding: "2px 5px",
@@ -190,6 +201,7 @@ const CalendarioCells = React.memo(
                               mt="2"
                               size="xs"
                               colorScheme="green"
+                              isDisabled={isDayToApprove}
                               onClick={() => {
                                 handleAprovarClick(day, funcionarioId);
                               }}
@@ -214,161 +226,206 @@ const CalendarioCells = React.memo(
   }
 );
 
-CalendarioCells.displayName = "CalendarCells";
+CalendarCells.displayName = "CalendarCells";
 
-const CalendarioTable = React.memo(({ funcionarios, selectedMonth, selectedYear, feriasFaltas, feriasPorAprovar }) => {
-  const [hoveredMonth, setHoveredMonth] = useState(null);
+const CalendarioTable = React.memo(
+  ({
+    funcionarios,
+    selectedMonth,
+    selectedYear,
+    feriasAprovadas,
+    feriasPorAprovar,
+    setDayClicked,
+    setMonthClicked,
+    setFuncionarioIdClicked,
+    setApprovedAllDays,
+  }) => {
+    const [hoveredMonth, setHoveredMonth] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-  const theadRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+    const theadRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
 
-  //Approved day and month
-  const [dayClicked, setDayClicked] = useState(null);
-  const [monthClicked, setMonthClicked] = useState(null);
-  const [funcionarioIdClicked, setFuncionarioIdClicked] = useState(null);
-  const [clickedList, setClickedList] = useState([]);
+    const [checkedItems, setCheckedItems] = useState([]);
+    const [filterApplied, setFilterApplied] = useState(false);
 
-  useEffect(() => {
-    if (dayClicked && monthClicked && funcionarioIdClicked) {
-      const funcionario = funcionarios.find((f) => f.id === funcionarioIdClicked);
-      setClickedList((prevList) => [...prevList, { day: dayClicked, month: monthClicked, funcionario: funcionario.nomeAbreviado }]);
+    const handleCheckboxChange = useCallback((funcionarioId) => {
+      setCheckedItems((prevCheckedItems) =>
+        prevCheckedItems.includes(funcionarioId) ? prevCheckedItems.filter((id) => id !== funcionarioId) : [...prevCheckedItems, funcionarioId]
+      );
+    }, []);
+
+    useEffect(() => {
+      setLoading(true);
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000); // Simulate loading time
+      return () => clearTimeout(timer);
+    }, [selectedYear]);
+
+    const filteredFuncionarios = useMemo(() => {
+      const sortedFuncionarios = [...funcionarios].sort((a, b) => a.nome.localeCompare(b.nome));
+      return filterApplied && checkedItems.length > 0
+        ? sortedFuncionarios.filter((funcionario) => checkedItems.includes(funcionario.id))
+        : sortedFuncionarios;
+    }, [filterApplied, checkedItems, funcionarios]);
+
+    const handleMouseDown = useCallback((e) => {
+      setIsDragging(true);
+      setStartX(e.pageX - theadRef.current.offsetLeft);
+      setScrollLeft(theadRef.current.scrollLeft);
+    }, []);
+
+    const handleMouseMove = useCallback(
+      (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - theadRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        theadRef.current.scrollLeft = scrollLeft - walk;
+      },
+      [isDragging, startX, scrollLeft]
+    );
+
+    const handleMouseUp = useCallback(() => {
+      setIsDragging(false);
+    }, []);
+
+    const handleAprovarTodosDias = (funcionarioId) => {
+      const allDaysToApprove = filteredPorAprovar
+        .filter((dado) => dado.funcionarioId === funcionarioId)
+        .map((dado) => ({
+          day: new Date(dado.dataInicio).getDate(),
+          month: new Date(dado.dataInicio).getMonth() + 1,
+          funcionarioId,
+        }));
+
+      setApprovedAllDays((prevList) => [...prevList, ...allDaysToApprove]);
+    };
+
+    const filteredMonths = useMemo(() => (selectedMonth === "Todos" ? months : [selectedMonth]), [selectedMonth]);
+
+    const filteredAprovadas = useMemo(
+      () => feriasAprovadas.filter((dado) => new Date(dado.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
+      [feriasAprovadas, selectedYear]
+    );
+    const filteredPorAprovar = useMemo(
+      () => feriasPorAprovar.filter((dado) => dado.aprovacoes && Object.keys(dado.aprovacoes).length > 0),
+      [feriasAprovadas]
+    );
+
+    if (loading) {
+      return (
+        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+        </Box>
+      );
     }
-  }, [dayClicked, monthClicked]);
 
-  const handleMouseDown = useCallback((e) => {
-    setIsDragging(true);
-    setStartX(e.pageX - theadRef.current.offsetLeft);
-    setScrollLeft(theadRef.current.scrollLeft);
-  }, []);
-
-  const handleMouseMove = useCallback(
-    (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      const x = e.pageX - theadRef.current.offsetLeft;
-      const walk = (x - startX) * 2;
-      theadRef.current.scrollLeft = scrollLeft - walk;
-    },
-    [isDragging, startX, scrollLeft]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  const handleRemoveItemList = (index) => {
-    setClickedList((prevList) => prevList.filter((_, i) => i !== index));
-  };
-
-  const filteredMonths = useMemo(() => (selectedMonth === "Todos" ? months : [selectedMonth]), [selectedMonth]);
-  const filteredFaltas = useMemo(
-    () => feriasFaltas.filter((dado) => new Date(dado.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
-    [feriasFaltas, selectedYear]
-  );
-  const filteredPorAprovar = useMemo(
-    () => feriasPorAprovar.filter((dado) => new Date(dado.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
-    [feriasPorAprovar, selectedYear]
-  );
-
-  return (
-    <div
-      ref={theadRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      style={{ overflow: "scroll", cursor: isDragging ? "grabbing" : "grab", height: "900px" }}
-    >
-      <table>
-        <thead className="thead-sticky-header">
-          <tr>
-            <th className="sticky-header"></th>
-            {filteredMonths.map((month) => (
-              <th
-                key={month}
-                colSpan={days.length}
-                className={`header-names-months ${month} ${hoveredMonth === month ? "hovered" : ""}`}
-                style={{ userSelect: "none" }}
-              >
-                {month}
-              </th>
-            ))}
-          </tr>
-          <tr>
-            <th className="sticky-header"></th>
-            {filteredMonths.map((month) => (
-              <React.Fragment key={month}>
-                {days.map((day) => (
-                  <th key={`${month}-${day}`} className="header-names-days" style={{ userSelect: "none" }}>
-                    {day}
-                  </th>
-                ))}
-              </React.Fragment>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {funcionarios
-            .filter((f) => !f.inativo)
-            .map((funcionario) => (
-              <tr key={funcionario.id} style={{ lineHeight: "3", padding: "2px 0", userSelect: "none" }}>
-                <td
-                  className="funcionario-names"
-                  style={{ display: "flex", alignItems: "center", userSelect: "none", justifyContent: "space-between" }}
+    return (
+      <div
+        ref={theadRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{ overflow: "scroll", height: "900px" }}
+      >
+        <table>
+          <thead className="thead-sticky-header" style={{ cursor: isDragging ? "grabbing" : "grab" }}>
+            <tr>
+              {filteredMonths.map((month) => (
+                <th
+                  key={month}
+                  colSpan={days.length}
+                  className={`header-names-months ${month} ${hoveredMonth === month ? "hovered" : ""}`}
+                  style={{ userSelect: "none" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <input type="checkbox" style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }} />
-                    <p style={{ fontSize: "12px" }}>{funcionario.nomeAbreviado}</p>
-                  </div>
-                  <Box display="flex" alignItems="center" marginRight="20px">
+                  {month}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              <Flex gap="2" className="sticky-filter" p="2">
+                <Button colorScheme="green" isDisabled={!checkedItems.length > 0} size="xs" onClick={() => setFilterApplied(true)}>
+                  Filtrar
+                </Button>
+                <Button
+                  colorScheme="red"
+                  isDisabled={!checkedItems.length > 0}
+                  size="xs"
+                  onClick={() => {
+                    setCheckedItems([]);
+                    setFilterApplied(false);
+                  }}
+                >
+                  Limpar
+                </Button>
+              </Flex>
+
+              {filteredMonths.map((month) => (
+                <React.Fragment key={month}>
+                  {days.map((day) => (
+                    <th key={`${month}-${day}`} className="header-names-days" style={{ userSelect: "none" }}>
+                      {day}
+                    </th>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredFuncionarios
+              .filter((f) => !f.inativo)
+              .map((funcionario) => (
+                <tr key={funcionario.id} style={{ lineHeight: "2", padding: "2px 0", userSelect: "none" }}>
+                  <td className="funcionario-names" style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+                    <input
+                      type="checkbox"
+                      style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }}
+                      checked={checkedItems.includes(funcionario.id)}
+                      onChange={() => handleCheckboxChange(funcionario.id)}
+                    />
+                    <p style={{ fontSize: "12px" }}>{normalizeName(funcionario.nomeAbreviado)}</p>
                     <Tag ml="2" size="sm" colorScheme="green">
                       10
                     </Tag>
                     <Tag ml="2" size="sm" colorScheme="blue">
                       10
                     </Tag>
-                  </Box>
-                </td>
-                {filteredMonths.map((month) => (
-                  <CalendarioCells
-                    key={month}
-                    month={month}
-                    setHoveredMonth={setHoveredMonth}
-                    feriasFaltas={filteredFaltas}
-                    feriasPorAprovar={filteredPorAprovar}
-                    funcionarioId={funcionario.id}
-                    setDayClicked={setDayClicked}
-                    setMonthClicked={setMonthClicked}
-                    setFuncionarioIdClicked={setFuncionarioIdClicked}
-                  />
-                ))}
-              </tr>
-            ))}
-        </tbody>
-      </table>
-      {clickedList.length > 0 && (
-        <Table variant="simple" size="sm" mt="4">
-          <Tbody>
-            {clickedList.map((item, index) => (
-              <Tr key={`${item.day}-${item.month}-${item.funcionario}`}>
-                <Td>{item.day}</Td>
-                <Td>{item.month}</Td>
-                <Td>{item.funcionario}</Td>
-                <Td>
-                  <Button size="xs" colorScheme="red" onClick={() => handleRemoveItemList(index)}>
-                    Remover
-                  </Button>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-    </div>
-  );
-});
+                    <Box mr="3" ml="auto" display="flex" gap="2">
+                      <IconButton
+                        colorScheme="gray"
+                        size="xs"
+                        icon={<CheckCircleIcon color="green" />}
+                        onClick={() => handleAprovarTodosDias(funcionario.id)}
+                      />
+                      <IconButton colorScheme="gray" size="xs" icon={<NotAllowedIcon color="red" />} />
+                    </Box>
+                  </td>
+                  {filteredMonths.map((month) => (
+                    <CalendarCells
+                      key={month}
+                      month={month}
+                      setHoveredMonth={setHoveredMonth}
+                      filteredAprovadas={filteredAprovadas}
+                      filteredPorAprovar={filteredPorAprovar}
+                      funcionarioId={funcionario.id}
+                      setDayClicked={setDayClicked}
+                      setMonthClicked={setMonthClicked}
+                      setFuncionarioIdClicked={setFuncionarioIdClicked}
+                    />
+                  ))}
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+);
 
 CalendarioTable.displayName = "CalendarTable";
 export default CalendarioTable;

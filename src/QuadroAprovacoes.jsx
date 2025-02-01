@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Button, Table, Tbody, Td, Tr, Box, Text } from "@chakra-ui/react";
-import { normalizeName } from "../../../utils/helpers/utils";
+import { normalizeName } from "./Utils";
 
 const QuadroAprovacoes = React.memo(({ clickedDayList, selectedYear, handleRemoveItemList, approvedAllDaysList, handleRemoverAllDays }) => {
   const groupedItems = useMemo(() => {
