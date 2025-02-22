@@ -1,9 +1,6 @@
-import "./App.css";
+import "./index.css";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import {
-  Heading,
-  Card,
-  CardBody,
   Flex,
   useDisclosure,
   Select,
@@ -221,13 +218,13 @@ function App() {
           </Select>
         </Box>
         <Box w="50%" display="flex" justifyContent="flex-end" gap="4">
-          <Button size="sm" colorScheme="blue" onClick={onToggle}>
+          <Button size="sm" colorScheme="gray" onClick={onToggle}>
             Caption
           </Button>
           <ButtonGroup size="sm">
             <Button
               size="sm"
-              colorScheme="orange"
+              colorScheme="green"
               onClick={handleOpenModalQuadroAprovacoes}
               isDisabled={approvedDay.length === 0 && approvedAllDaysList.length === 0}
             >
