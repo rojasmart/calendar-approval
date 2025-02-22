@@ -394,52 +394,53 @@ const CalendarioTable = React.memo(
             </tr>
           </thead>
           <tbody>
-            {filteredFuncionarios
-              .filter((f) => !f.inativo)
-              .map((funcionario) => (
-                <tr key={funcionario.id} style={{ lineHeight: "2", padding: "2px 0", userSelect: "none" }}>
-                  <td className="funcionario-names" style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-                    <input
-                      type="checkbox"
-                      style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }}
-                      checked={checkedItems.includes(funcionario.id)}
-                      onChange={() => handleCheckboxChange(funcionario.id)}
-                    />
-                    <p style={{ fontSize: "12px" }}>{normalizeName(funcionario.nomeAbreviado)}</p>
-                    <Tag ml="2" size="sm" colorScheme="green">
-                      10
-                    </Tag>
-                    <Tag ml="2" size="sm" colorScheme="blue">
-                      10
-                    </Tag>
-                    <Box mr="3" ml="auto" display="flex" gap="2">
-                      <IconButton
-                        colorScheme="gray"
-                        size="xs"
-                        icon={<CheckCircleIcon color="green" />}
-                        onClick={() => handleApproveAllDays(funcionario.id)}
+            {filteredFuncionarios &&
+              filteredFuncionarios
+                .filter((f) => !f.inativo)
+                .map((funcionario) => (
+                  <tr key={funcionario.id} style={{ lineHeight: "2", padding: "2px 0", userSelect: "none" }}>
+                    <td className="funcionario-names" style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+                      <input
+                        type="checkbox"
+                        style={{ cursor: "pointer", marginLeft: "8px", marginRight: "12px" }}
+                        checked={checkedItems.includes(funcionario.id)}
+                        onChange={() => handleCheckboxChange(funcionario.id)}
                       />
-                      <IconButton
-                        colorScheme="gray"
-                        size="xs"
-                        icon={<NotAllowedIcon color="red" />}
-                        onClick={() => handleNotApproveAllDays(funcionario.id)}
+                      <p style={{ fontSize: "12px" }}>{normalizeName(funcionario.nomeAbreviado)}</p>
+                      <Tag ml="2" size="sm" colorScheme="green">
+                        10
+                      </Tag>
+                      <Tag ml="2" size="sm" colorScheme="blue">
+                        10
+                      </Tag>
+                      <Box mr="3" ml="auto" display="flex" gap="2">
+                        <IconButton
+                          colorScheme="gray"
+                          size="xs"
+                          icon={<CheckCircleIcon color="green" />}
+                          onClick={() => handleApproveAllDays(funcionario.id)}
+                        />
+                        <IconButton
+                          colorScheme="gray"
+                          size="xs"
+                          icon={<NotAllowedIcon color="red" />}
+                          onClick={() => handleNotApproveAllDays(funcionario.id)}
+                        />
+                      </Box>
+                    </td>
+                    {filteredMonths.map((month) => (
+                      <CalendarCells
+                        key={month}
+                        month={month}
+                        setHoveredMonth={setHoveredMonth}
+                        filteredApproved={filteredApproved}
+                        filteredForApproval={filteredForApproval}
+                        funcionarioId={funcionario.id}
+                        setDayClicked={setDayClicked}
                       />
-                    </Box>
-                  </td>
-                  {filteredMonths.map((month) => (
-                    <CalendarCells
-                      key={month}
-                      month={month}
-                      setHoveredMonth={setHoveredMonth}
-                      filteredApproved={filteredApproved}
-                      filteredForApproval={filteredForApproval}
-                      funcionarioId={funcionario.id}
-                      setDayClicked={setDayClicked}
-                    />
-                  ))}
-                </tr>
-              ))}
+                    ))}
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>

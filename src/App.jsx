@@ -120,7 +120,7 @@ function App() {
     if (department === "Todos") {
       setFuncionariosFiltrados(funcionarios);
     } else {
-      const filteredFuncionarios = funcionarios.filter((funcionario) => funcionario.departamentoId === department);
+      const filteredFuncionarios = funcionarios.filter((funcionario) => funcionario.departamentoId === department && department);
       setFuncionariosFiltrados(filteredFuncionarios);
     }
   }, [department, funcionarios]);
