@@ -9,8 +9,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Menu />} />
-        <Route path="/schedule-vacation" element={<ScheduleVacation />} />
-        <Route path="/validate-vacation" element={<ValidateVacation />} />
+        <Route path="/schedule" element={<ScheduleVacation />} />
+        <Route path="/validate" element={<ValidateVacation />} />
       </Routes>
     </Router>
   );
