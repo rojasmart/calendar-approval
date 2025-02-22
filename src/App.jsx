@@ -184,7 +184,7 @@ function App() {
         </ModalContent>
       </Modal>
 
-      <Flex mb="4" justifyContent="space-between" gap="6">
+      <Flex p="6" borderRadius={"5px"} border={"1px solid #e9e9e9"} mb="4" justifyContent="space-between" gap="6">
         <Box w="50%" display="flex" gap="4">
           <Select cursor="pointer" size="sm" placeholder="Departamento" value={department} onChange={handleChangeDepartamento}>
             <option value="All">All</option>

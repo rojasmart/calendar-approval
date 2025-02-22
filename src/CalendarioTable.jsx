@@ -2,7 +2,6 @@ import React, { useState, useRef, useMemo, useCallback, useEffect } from "react"
 
 import { normalizeName } from "./Utils";
 import {
-  Tag,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -19,6 +18,10 @@ import {
   Spinner,
   Box,
   IconButton,
+  Table,
+  Thead,
+  Tbody,
+  TableContainer,
 } from "@chakra-ui/react";
 
 import { CheckCircleIcon, NotAllowedIcon } from "@chakra-ui/icons";
@@ -342,7 +345,9 @@ const CalendarioTable = React.memo(
     }
 
     return (
-      <div
+      <TableContainer
+        borderRadius={"5px"}
+        border={"1px solid #e9e9e9"}
         ref={theadRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -350,8 +355,8 @@ const CalendarioTable = React.memo(
         onMouseLeave={handleMouseUp}
         style={{ overflow: "scroll", height: "900px" }}
       >
-        <table>
-          <thead className="thead-sticky-header" style={{ cursor: isDragging ? "grabbing" : "grab" }}>
+        <Table>
+          <Thead className="thead-sticky-header" style={{ cursor: isDragging ? "grabbing" : "grab" }}>
             <tr>
               {filteredMonths.map((month) => (
                 <th
@@ -367,7 +372,7 @@ const CalendarioTable = React.memo(
             <tr>
               <Flex gap="2" className="sticky-filter" p="2">
                 <Button colorScheme="green" isDisabled={!checkedItems.length > 0} size="xs" onClick={() => setFilterApplied(true)}>
-                  Filtrar
+                  Filter
                 </Button>
                 <Button
                   colorScheme="red"
@@ -378,22 +383,22 @@ const CalendarioTable = React.memo(
                     setFilterApplied(false);
                   }}
                 >
-                  Limpar
+                  Clear
                 </Button>
               </Flex>
 
               {filteredMonths.map((month) => (
                 <React.Fragment key={month}>
                   {days.map((day) => (
-                    <th key={`${month}-${day}`} className="header-names-days" style={{ userSelect: "none" }}>
+                    <th key={`${month}-${day}`} className="header-names-days" style={{ userSelect: "none", fontSize: "13px" }}>
                       {day}
                     </th>
                   ))}
                 </React.Fragment>
               ))}
             </tr>
-          </thead>
-          <tbody>
+          </Thead>
+          <Tbody>
             {filteredFuncionarios &&
               filteredFuncionarios
                 .filter((f) => !f.inativo)
@@ -407,12 +412,7 @@ const CalendarioTable = React.memo(
                         onChange={() => handleCheckboxChange(funcionario.id)}
                       />
                       <p style={{ fontSize: "12px" }}>{normalizeName(funcionario.nomeAbreviado)}</p>
-                      <Tag ml="2" size="sm" colorScheme="green">
-                        10
-                      </Tag>
-                      <Tag ml="2" size="sm" colorScheme="blue">
-                        10
-                      </Tag>
+
                       <Box mr="3" ml="auto" display="flex" gap="2">
                         <IconButton
                           colorScheme="gray"
@@ -441,9 +441,9 @@ const CalendarioTable = React.memo(
                     ))}
                   </tr>
                 ))}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </TableContainer>
     );
   }
 );
