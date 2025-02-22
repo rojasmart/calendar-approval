@@ -160,7 +160,7 @@ function App() {
       <Modal isOpen={isModalOpenQuadroAprovacoes} onClose={handleCloseModalQuadroAprovacoes} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Quadro de Aprovações</ModalHeader>
+          <ModalHeader>To Approve</ModalHeader>
           <ModalBody>
             <QuadroAprovacoes
               approvedDay={approvedDay}
@@ -172,7 +172,7 @@ function App() {
           </ModalBody>
           <ModalFooter>
             <Button size="sm" colorScheme="gray" mr={3} onClick={handleCloseModalQuadroAprovacoes}>
-              Cancelar
+              Cancel
             </Button>
             <Button
               size="sm"
@@ -181,85 +181,78 @@ function App() {
               isDisabled={approvedDay.length === 0 && approvedAllDaysList.length === 0}
               onClick={() => handleSubmitFerias()}
             >
-              Submeter
+              Submit
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
-      <Heading as="h2" size="md">
-        Vacation approval
-      </Heading>
-      <Card mt="5" p="2">
-        <CardBody display="flex" flexDirection="column">
-          <Flex mb="4" justifyContent="space-between" gap="6">
-            <Box w="50%" display="flex" gap="4">
-              <Select cursor="pointer" size="sm" placeholder="Departamento" value={department} onChange={handleChangeDepartamento}>
-                <option value="Todos">Todos</option>
-                {departamentos.map((departamento) => (
-                  <option key={departamento.id} value={departamento.idAlternativo}>
-                    {normalizeName(departamento.nome)}
-                  </option>
-                ))}
-              </Select>
-              <Select cursor="pointer" size="sm" placeholder="Mês" onChange={handleChangeMonth}>
-                <option value="Todos">Todos</option>
-                {months.map((month, index) => (
-                  <option key={index} value={month}>
-                    {month}
-                  </option>
-                ))}
-              </Select>
-              <Select cursor="pointer" size="sm" placeholder="Ano" value={year} onChange={handleChangeYear}>
-                {years.map((year, index) => (
-                  <option key={index} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </Select>
-              <Select cursor="pointer" size="sm" placeholder="Ordem" value={order} onChange={(e) => setOrder(e.target.value)}>
-                {orders.map((order, index) => (
-                  <option key={index} value={order}>
-                    {order}
-                  </option>
-                ))}
-              </Select>
-            </Box>
-            <Box w="50%" display="flex" justifyContent="flex-end" gap="4">
-              <Button size="sm" colorScheme="blue" onClick={onToggle}>
-                Legenda
-              </Button>
-              <ButtonGroup size="sm">
-                <Button
-                  size="sm"
-                  colorScheme="orange"
-                  onClick={handleOpenModalQuadroAprovacoes}
-                  isDisabled={approvedDay.length === 0 && approvedAllDaysList.length === 0}
-                >
-                  Quadro Aprovações
-                </Button>
-                <IconButton aria-label="clicked list" icon={<Text>{approvedDay.length + approvedAllDaysList.length}</Text>} />
-              </ButtonGroup>
-            </Box>
-          </Flex>
-          <Flex direction={["column"]} gap="6">
-            <CalendarioTable
-              funcionarios={funcionariosFiltrados}
-              selectedMonth={month}
-              selectedYear={year}
-              daysApproved={daysApproved}
-              daysForApproval={daysForApproval}
-              setDayClicked={setDayClicked}
-              setApprovedAllDays={setApprovedAllDays}
-            />
-          </Flex>
-          <Slide direction="bottom" in={isOpen} style={{ zIndex: 10 }}>
-            <Box p="20px" color="white" mt="4" bg="#f5f5f5" shadow="md">
-              <LegendaCores />
-            </Box>
-          </Slide>
-        </CardBody>
-      </Card>
+      <Flex mb="4" justifyContent="space-between" gap="6">
+        <Box w="50%" display="flex" gap="4">
+          <Select cursor="pointer" size="sm" placeholder="Departamento" value={department} onChange={handleChangeDepartamento}>
+            <option value="Todos">All</option>
+            {departamentos.map((departamento) => (
+              <option key={departamento.id} value={departamento.idAlternativo}>
+                {normalizeName(departamento.nome)}
+              </option>
+            ))}
+          </Select>
+          <Select cursor="pointer" size="sm" placeholder="Mês" onChange={handleChangeMonth}>
+            <option value="Todos">All</option>
+            {months.map((month, index) => (
+              <option key={index} value={month}>
+                {month}
+              </option>
+            ))}
+          </Select>
+          <Select cursor="pointer" size="sm" placeholder="Ano" value={year} onChange={handleChangeYear}>
+            {years.map((year, index) => (
+              <option key={index} value={year}>
+                {year}
+              </option>
+            ))}
+          </Select>
+          <Select cursor="pointer" size="sm" placeholder="Ordem" value={order} onChange={(e) => setOrder(e.target.value)}>
+            {orders.map((order, index) => (
+              <option key={index} value={order}>
+                {order}
+              </option>
+            ))}
+          </Select>
+        </Box>
+        <Box w="50%" display="flex" justifyContent="flex-end" gap="4">
+          <Button size="sm" colorScheme="blue" onClick={onToggle}>
+            Caption
+          </Button>
+          <ButtonGroup size="sm">
+            <Button
+              size="sm"
+              colorScheme="orange"
+              onClick={handleOpenModalQuadroAprovacoes}
+              isDisabled={approvedDay.length === 0 && approvedAllDaysList.length === 0}
+            >
+              To Approve
+            </Button>
+            <IconButton aria-label="clicked list" icon={<Text>{approvedDay.length + approvedAllDaysList.length}</Text>} />
+          </ButtonGroup>
+        </Box>
+      </Flex>
+      <Flex direction={["column"]} gap="6">
+        <CalendarioTable
+          funcionarios={funcionariosFiltrados}
+          selectedMonth={month}
+          selectedYear={year}
+          daysApproved={daysApproved}
+          daysForApproval={daysForApproval}
+          setDayClicked={setDayClicked}
+          setApprovedAllDays={setApprovedAllDays}
+        />
+      </Flex>
+      <Slide direction="bottom" in={isOpen} style={{ zIndex: 10 }}>
+        <Box p="20px" color="white" mt="4" bg="#f5f5f5" shadow="md">
+          <LegendaCores />
+        </Box>
+      </Slide>
     </>
   );
 }
