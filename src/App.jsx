@@ -188,7 +188,7 @@ function App() {
       </Modal>
 
       <Heading as="h2" size="md">
-        Aprovações de Férias
+        Vacation approval
       </Heading>
       <Card mt="5" p="2">
         <CardBody display="flex" flexDirection="column">
