@@ -63,7 +63,7 @@ function App() {
     };
 
     fetchData();
-  }, []);
+  }, [year]); // Add year as a dependency
 
   //Aprove single day
   const [dayClicked, setDayClicked] = useState(null);
