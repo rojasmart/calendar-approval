@@ -313,7 +313,7 @@ const CalendarioTable = React.memo(
     );
     const filteredPorAprovar = useMemo(
       () => feriasPorAprovar.filter((dado) => dado.aprovacoes && Object.keys(dado.aprovacoes).length > 0),
-      [feriasAprovadas]
+      [feriasPorAprovar]
     );
 
     if (loading) {
