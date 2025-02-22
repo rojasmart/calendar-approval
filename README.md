@@ -18,7 +18,7 @@ To install and run this project locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/calendar-approval.git
+   git clone https://github.com/binarypsilocybin/calendar-approval.git
    ```
 2. Navigate to the project directory:
    ```bash
@@ -50,4 +50,4 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 
 ## Contact
 
-For any questions or feedback, please contact [your email address].
+For any questions or feedback, please contact rogeriosvaldo@gmail.com.
