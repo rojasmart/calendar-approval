@@ -28,8 +28,8 @@ import QuadroAprovacoes from "./QuadroAprovacoes";
 import LegendaCores from "./LegendaCores";
 
 const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; // Example months
-const years = [2021, 2022, 2023, 2024, 2025]; // Example years
-const orders = ["Ascending", "Descending"]; // Example orders
+const years = [2021, 2022, 2023, 2024, 2025]; // Example year
+const orders = ["Ascending", "Descending"]; // Example order
 
 function App() {
   const [department, setDepartment] = useState("Todos");
