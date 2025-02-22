@@ -1,7 +1,6 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 
 import { normalizeName } from "./Utils";
-
 import {
   Tag,
   Popover,
@@ -42,204 +41,211 @@ const monthMap = {
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-const CalendarCells = React.memo(
-  ({ month, setHoveredMonth, funcionarioId, filteredAprovadas, filteredPorAprovar, setDayClicked, setMonthClicked, setFuncionarioIdClicked }) => {
-    const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
-    const [approvedDays, setApprovedDays] = useState([]);
-
-    const memoizedMatches = useMemo(() => {
-      return days.map((day) => {
-        const isApproved =
-          filteredAprovadas &&
-          filteredAprovadas.some((faltas) => {
-            const dataInicio = new Date(faltas.dataInicio);
-            const dayInicio = dataInicio.getDate();
-            const monthInicio = dataInicio.getMonth() + 1;
-            return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
-          });
-
-        const isPending =
-          !isApproved &&
-          filteredPorAprovar &&
-          filteredPorAprovar.some((faltas) => {
-            const dataInicio = new Date(faltas.dataInicio);
-            const dayInicio = dataInicio.getDate();
-            const monthInicio = dataInicio.getMonth() + 1;
-            return faltas.funcionarioId === funcionarioId && dayInicio === day && monthInicio === monthMap[month];
-          });
-
-        return { isApproved, isPending };
+const CalendarCells = React.memo(({ month, setHoveredMonth, funcionarioId, filteredApproved, filteredForApproval, setDayClicked }) => {
+  const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
+  const [approvedDays, setApprovedDays] = useState([]);
+  const memoizedMatches = useMemo(() => {
+    return days.map((day) => {
+      const foundApproved = filteredApproved?.find((falta) => {
+        const d = new Date(falta.dataInicio);
+        return falta.funcionarioId === funcionarioId && d.getDate() === day && d.getMonth() + 1 === monthMap[month];
       });
-    }, [filteredAprovadas, filteredPorAprovar, funcionarioId, month]);
+      const foundPending = filteredForApproval?.find((falta) => {
+        const d = new Date(falta.dataInicio);
+        return falta.funcionarioId === funcionarioId && d.getDate() === day && d.getMonth() + 1 === monthMap[month];
+      });
 
-    const handleMouseEnter = useCallback(
-      (e) => {
-        const cell = e.target;
-        const row = cell.parentElement;
-        const table = row.parentElement.parentElement;
-        const columnIndex = Array.from(row.children).indexOf(cell);
+      const foundParcialApproved = filteredForApproval?.find((falta) => {
+        const d = new Date(falta.dataInicio);
+        return falta.funcionarioId === funcionarioId && d.getDate() === day && d.getMonth() + 1 === monthMap[month] && falta.aprovacoes?.aprovadoRH;
+      });
 
-        const isMatch = cell.getAttribute("data-original-color") === "green" || cell.getAttribute("data-original-color") === "yellow";
+      return {
+        isApproved: !!foundApproved,
+        isPending: !!foundPending,
+        isParcialApproved: !!foundParcialApproved,
+        matchedItem: foundPending || foundApproved || foundParcialApproved || null,
+      };
+    });
+  }, [filteredApproved, filteredForApproval, funcionarioId, month]);
 
-        if (isMatch) {
-          cell.style.backgroundColor = "red";
+  const handleMouseEnter = useCallback(
+    (e) => {
+      const cell = e.target;
+      const row = cell.parentElement;
+      const table = row.parentElement.parentElement;
+      const columnIndex = Array.from(row.children).indexOf(cell);
+
+      const isMatch = cell.getAttribute("data-original-color") === "green" || cell.getAttribute("data-original-color") === "yellow";
+
+      if (isMatch) {
+        cell.style.backgroundColor = "red";
+      }
+
+      Array.from(row.children).forEach((td, index) => {
+        if (index !== columnIndex && !td.hasAttribute("data-original-color")) {
+          td.style.backgroundColor = "#f5f5f5";
         }
+      });
 
-        Array.from(row.children).forEach((td, index) => {
-          if (index !== columnIndex && !td.hasAttribute("data-original-color")) {
-            td.style.backgroundColor = "#f5f5f5";
-          }
-        });
+      const headerRow = table.querySelector("thead tr:nth-child(2)");
+      if (headerRow && headerRow.children[columnIndex]) {
+        headerRow.children[columnIndex].classList.add("bold-day");
+      }
 
-        const headerRow = table.querySelector("thead tr:nth-child(2)");
-        if (headerRow && headerRow.children[columnIndex]) {
-          headerRow.children[columnIndex].classList.add("bold-day");
+      setHoveredMonth(month);
+
+      const monthHeader = table.querySelector(`.header-names-months.${month}`);
+      if (monthHeader) {
+        monthHeader.classList.add("hovered");
+      }
+    },
+    [setHoveredMonth, month]
+  );
+
+  const handleMouseLeave = useCallback(
+    (e) => {
+      const cell = e.target;
+      const row = cell.parentElement;
+      const table = row.parentElement.parentElement;
+      const columnIndex = Array.from(row.children).indexOf(cell);
+
+      cell.style.backgroundColor = cell.getAttribute("data-original-color");
+
+      Array.from(row.children).forEach((td, index) => {
+        if (index !== columnIndex) {
+          td.style.backgroundColor = td.getAttribute("data-original-color");
         }
+      });
 
-        setHoveredMonth(month);
-
-        const monthHeader = table.querySelector(`.header-names-months.${month}`);
-        if (monthHeader) {
-          monthHeader.classList.add("hovered");
+      Array.from(table.rows).forEach((tr) => {
+        if (tr.children[columnIndex] && tr !== row) {
+          tr.children[columnIndex].style.backgroundColor = tr.children[columnIndex].getAttribute("data-original-color");
         }
-      },
-      [setHoveredMonth, month]
-    );
+      });
 
-    const handleMouseLeave = useCallback(
-      (e) => {
-        const cell = e.target;
-        const row = cell.parentElement;
-        const table = row.parentElement.parentElement;
-        const columnIndex = Array.from(row.children).indexOf(cell);
+      const headerRow = table.querySelector("thead tr:nth-child(2)");
+      if (headerRow && headerRow.children[columnIndex]) {
+        headerRow.children[columnIndex].classList.remove("bold-day");
+      }
 
-        cell.style.backgroundColor = cell.getAttribute("data-original-color");
+      setHoveredMonth(null);
 
-        Array.from(row.children).forEach((td, index) => {
-          if (index !== columnIndex) {
-            td.style.backgroundColor = td.getAttribute("data-original-color");
-          }
-        });
+      const monthHeader = table.querySelector(`.header-names-months.${month}`);
+      if (monthHeader) {
+        monthHeader.classList.remove("hovered");
+      }
+    },
+    [setHoveredMonth, month]
+  );
 
-        Array.from(table.rows).forEach((tr) => {
-          if (tr.children[columnIndex] && tr !== row) {
-            tr.children[columnIndex].style.backgroundColor = tr.children[columnIndex].getAttribute("data-original-color");
-          }
-        });
-
-        const headerRow = table.querySelector("thead tr:nth-child(2)");
-        if (headerRow && headerRow.children[columnIndex]) {
-          headerRow.children[columnIndex].classList.remove("bold-day");
-        }
-
-        setHoveredMonth(null);
-
-        const monthHeader = table.querySelector(`.header-names-months.${month}`);
-        if (monthHeader) {
-          monthHeader.classList.remove("hovered");
-        }
-      },
-      [setHoveredMonth, month]
-    );
-
-    const handleAprovarClick = (day) => {
-      setDayClicked(day);
-      setMonthClicked(month);
-      setFuncionarioIdClicked(funcionarioId);
-      setOpenPopoverIndex(null);
-
-      //Logic for approving day cell blocked
-      setApprovedDays((prevApprovedDays) => [...prevApprovedDays, { day, month, funcionarioId }]);
+  const handleApproveDay = (day) => {
+    const approved = {
+      ...day,
+      approved: true,
     };
+    setDayClicked(approved);
+    setOpenPopoverIndex(null);
+    //Logic for approving day cell blocked
+    setApprovedDays((prevApprovedDays) => [...prevApprovedDays, { day }]);
+  };
 
-    return (
-      <>
-        {days.map((day, index) => {
-          const { isApproved, isPending } = memoizedMatches[index];
-          const isDayToApprove = approvedDays.some(
-            (approvedDay) => approvedDay.day === day && approvedDay.month === month && approvedDay.funcionarioId === funcionarioId
-          );
-          const originalColor = isDayToApprove ? "orange" : isApproved ? "green" : isPending ? "yellow" : "";
-          return (
-            <td
-              key={`${month}-${day}`}
-              style={{
-                minWidth: "30px",
-                fontSize: "12px",
-                textAlign: "center",
-                padding: "2px 5px",
-                border: "1px solid #e9e9e9",
-                boxSizing: "border-box",
-                color: isApproved || isPending ? "white" : "",
-                cursor: "pointer",
-                backgroundColor: originalColor,
-              }}
-              data-original-color={originalColor}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {isApproved || isPending ? (
-                <>
-                  {isApproved && day}
-                  {isPending && (
-                    <Popover isOpen={openPopoverIndex === index} onClose={() => setOpenPopoverIndex(null)} placement="right" closeOnBlur={false}>
-                      <PopoverTrigger onClick={() => setOpenPopoverIndex(index)}>
-                        <div onClick={() => setOpenPopoverIndex(index)}>{day}</div>
-                      </PopoverTrigger>
-                      <PopoverContent color="black">
-                        <PopoverArrow />
-                        <PopoverCloseButton />
-                        <PopoverHeader>
-                          <Heading fontSize="lg">Confirmação</Heading>
-                        </PopoverHeader>
-                        <PopoverBody>
-                          <Text fontSize="sm">Tem a certeza que isto e aquilo</Text>
-                        </PopoverBody>
-                        <PopoverFooter>
-                          <ButtonGroup size="sm">
-                            <Button
-                              mt="2"
-                              size="xs"
-                              colorScheme="green"
-                              isDisabled={isDayToApprove}
-                              onClick={() => {
-                                handleAprovarClick(day, funcionarioId);
-                              }}
-                            >
-                              Aprovar
-                            </Button>
-                            <Button mt="2" size="xs" colorScheme="red" onClick={() => {}}>
-                              Rejeitar
-                            </Button>
-                          </ButtonGroup>
-                        </PopoverFooter>
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                </>
-              ) : null}
-            </td>
-          );
-        })}
-      </>
-    );
-  }
-);
+  const handleNotApproveDay = (day) => {
+    //Mutation for not approving day cell
+    const notApproved = {
+      ...day,
+      approved: false,
+    };
+    setDayClicked(notApproved);
+    setOpenPopoverIndex(null);
+  };
+
+  return (
+    <>
+      {days.map((day, index) => {
+        const { isApproved, isPending, isParcialApproved, matchedItem } = memoizedMatches[index];
+
+        const isDayToApprove = approvedDays.some(
+          (approvedDay) => approvedDay.day === day && approvedDay.month === month && approvedDay.funcionarioId === funcionarioId
+        );
+
+        const originalColor = isDayToApprove ? "#68d391" : isParcialApproved ? "#68d391" : isApproved ? "#2f855a" : isPending ? "#c6f6d5" : "";
+        return (
+          <td
+            key={`${month}-${day}`}
+            style={{
+              minWidth: "30px",
+              fontSize: "12px",
+              textAlign: "center",
+              padding: "2px 5px",
+              border: "1px solid #e9e9e9",
+              boxSizing: "border-box",
+              color: isApproved || isPending ? "white" : "",
+              cursor: "pointer",
+              backgroundColor: originalColor,
+            }}
+            data-original-color={originalColor}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {isApproved || isPending ? (
+              <>
+                {isApproved && day}
+                {isPending && (
+                  <Popover isOpen={openPopoverIndex === index} onClose={() => setOpenPopoverIndex(null)} placement="right" closeOnBlur={false}>
+                    <PopoverTrigger onClick={() => setOpenPopoverIndex(index)}>
+                      <div onClick={() => setOpenPopoverIndex(index)}>{day}</div>
+                    </PopoverTrigger>
+                    <PopoverContent color="black">
+                      <PopoverArrow />
+                      <PopoverCloseButton />
+                      <PopoverHeader>
+                        <Heading fontSize="lg">Confirmação</Heading>
+                      </PopoverHeader>
+                      <PopoverBody>
+                        <Text fontSize="sm">Tem a certeza que isto e aquilo</Text>
+                      </PopoverBody>
+                      <PopoverFooter>
+                        <ButtonGroup size="sm">
+                          <Button
+                            mt="2"
+                            size="xs"
+                            colorScheme="green"
+                            isDisabled={isDayToApprove}
+                            onClick={() => {
+                              handleApproveDay(matchedItem);
+                            }}
+                          >
+                            Aprovar
+                          </Button>
+                          <Button
+                            mt="2"
+                            size="xs"
+                            colorScheme="red"
+                            onClick={() => {
+                              handleNotApproveDay(matchedItem);
+                            }}
+                          >
+                            Rejeitar
+                          </Button>
+                        </ButtonGroup>
+                      </PopoverFooter>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </>
+            ) : null}
+          </td>
+        );
+      })}
+    </>
+  );
+});
 
 CalendarCells.displayName = "CalendarCells";
 
 const CalendarioTable = React.memo(
-  ({
-    funcionarios,
-    selectedMonth,
-    selectedYear,
-    feriasAprovadas,
-    feriasPorAprovar,
-    setDayClicked,
-    setMonthClicked,
-    setFuncionarioIdClicked,
-    setApprovedAllDays,
-  }) => {
+  ({ funcionarios, selectedMonth, selectedYear, daysApproved, daysForApproval, setDayClicked, setApprovedAllDays }) => {
     const [hoveredMonth, setHoveredMonth] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -293,27 +299,38 @@ const CalendarioTable = React.memo(
       setIsDragging(false);
     }, []);
 
-    const handleAprovarTodosDias = (funcionarioId) => {
-      const allDaysToApprove = filteredPorAprovar
-        .filter((dado) => dado.funcionarioId === funcionarioId)
-        .map((dado) => ({
-          day: new Date(dado.dataInicio).getDate(),
-          month: new Date(dado.dataInicio).getMonth() + 1,
-          funcionarioId,
+    const handleApproveAllDays = (funcionarioId) => {
+      const allDaysToApprove = filteredForApproval
+        .filter((day) => day.funcionarioId === funcionarioId)
+        .map((day) => ({
+          ...day,
+          approved: true,
         }));
 
       setApprovedAllDays((prevList) => [...prevList, ...allDaysToApprove]);
     };
 
+    const handleNotApproveAllDays = (funcionarioId) => {
+      const allDaysToNotApprove = filteredForApproval
+        .filter((day) => day.funcionarioId === funcionarioId)
+        .map((day) => ({
+          ...day,
+          approved: false,
+        }));
+
+      setApprovedAllDays((prevList) => [...prevList, ...allDaysToNotApprove]);
+    };
+
     const filteredMonths = useMemo(() => (selectedMonth === "Todos" ? months : [selectedMonth]), [selectedMonth]);
 
-    const filteredAprovadas = useMemo(
-      () => feriasAprovadas.filter((dado) => new Date(dado.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
-      [feriasAprovadas, selectedYear]
+    const filteredApproved = useMemo(
+      () => daysApproved.filter((day) => new Date(day.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
+      [daysApproved, selectedYear]
     );
-    const filteredPorAprovar = useMemo(
-      () => feriasPorAprovar.filter((dado) => dado.aprovacoes && Object.keys(dado.aprovacoes).length > 0),
-      [feriasPorAprovar]
+
+    const filteredForApproval = useMemo(
+      () => daysForApproval.filter((day) => day.aprovacoes && Object.keys(day.aprovacoes).length > 0),
+      [daysApproved]
     );
 
     if (loading) {
@@ -400,9 +417,14 @@ const CalendarioTable = React.memo(
                         colorScheme="gray"
                         size="xs"
                         icon={<CheckCircleIcon color="green" />}
-                        onClick={() => handleAprovarTodosDias(funcionario.id)}
+                        onClick={() => handleApproveAllDays(funcionario.id)}
                       />
-                      <IconButton colorScheme="gray" size="xs" icon={<NotAllowedIcon color="red" />} />
+                      <IconButton
+                        colorScheme="gray"
+                        size="xs"
+                        icon={<NotAllowedIcon color="red" />}
+                        onClick={() => handleNotApproveAllDays(funcionario.id)}
+                      />
                     </Box>
                   </td>
                   {filteredMonths.map((month) => (
@@ -410,12 +432,10 @@ const CalendarioTable = React.memo(
                       key={month}
                       month={month}
                       setHoveredMonth={setHoveredMonth}
-                      filteredAprovadas={filteredAprovadas}
-                      filteredPorAprovar={filteredPorAprovar}
+                      filteredApproved={filteredApproved}
+                      filteredForApproval={filteredForApproval}
                       funcionarioId={funcionario.id}
                       setDayClicked={setDayClicked}
-                      setMonthClicked={setMonthClicked}
-                      setFuncionarioIdClicked={setFuncionarioIdClicked}
                     />
                   ))}
                 </tr>
@@ -427,5 +447,5 @@ const CalendarioTable = React.memo(
   }
 );
 
-CalendarioTable.displayName = "CalendarTable";
+CalendarioTable.displayName = "CalendarioTable";
 export default CalendarioTable;

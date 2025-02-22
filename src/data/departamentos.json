@@ -1,0 +1,30 @@
+[
+	{
+		"id": 0,
+		"nome": "BOARD",
+		"idAlternativo": "001",
+		"inativo": false,
+		"isProtected": false
+	},
+	{
+		"id": 0,
+		"nome": "ADMINISTRATIVE & FINANCE",
+		"idAlternativo": "002",
+		"inativo": false,
+		"isProtected": false
+	},
+	{
+		"id": 0,
+		"nome": "SALES",
+		"idAlternativo": "003",
+		"inativo": false,
+		"isProtected": false
+	},
+	{
+		"id": 0,
+		"nome": "OPERATIONS",
+		"idAlternativo": "004",
+		"inativo": false,
+		"isProtected": false
+	}
+]
