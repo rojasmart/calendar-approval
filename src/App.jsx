@@ -51,7 +51,7 @@ function App() {
     const fetchData = async () => {
       const departamentosResponse = await fetch("/src/data/departamentos.json");
       const funcionariosResponse = await fetch("/src/data/funcionarios.json");
-      const feriasFaltasResponse = await fetch("/src/data/feriasFaltas.json");
+      const feriasFaltasResponse = await fetch(`/src/data/${year}.json`);
 
       const departamentosData = await departamentosResponse.json();
       const funcionariosData = await funcionariosResponse.json();
