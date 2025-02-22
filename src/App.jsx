@@ -29,8 +29,8 @@ const years = [2021, 2022, 2023, 2024, 2025]; // Example years
 const orders = ["Ascending", "Descending"]; // Example orders
 
 function App() {
-  const [department, setDepartment] = useState("Todos");
-  const [month, setMonth] = useState("Todos");
+  const [department, setDepartment] = useState("All");
+  const [month, setMonth] = useState("All");
   const [year, setYear] = useState("2024");
   const [order, setOrder] = useState("");
 
@@ -114,7 +114,7 @@ function App() {
   }, [approvedAllDays]);
 
   useEffect(() => {
-    if (department === "Todos") {
+    if (department === "All") {
       setFuncionariosFiltrados(funcionarios);
     } else {
       const filteredFuncionarios = funcionarios.filter((funcionario) => funcionario.departamentoId === department && department);
@@ -187,29 +187,29 @@ function App() {
       <Flex mb="4" justifyContent="space-between" gap="6">
         <Box w="50%" display="flex" gap="4">
           <Select cursor="pointer" size="sm" placeholder="Departamento" value={department} onChange={handleChangeDepartamento}>
-            <option value="Todos">All</option>
+            <option value="All">All</option>
             {departamentos.map((departamento) => (
               <option key={departamento.id} value={departamento.idAlternativo}>
                 {normalizeName(departamento.nome)}
               </option>
             ))}
           </Select>
-          <Select cursor="pointer" size="sm" placeholder="Mês" onChange={handleChangeMonth}>
-            <option value="Todos">All</option>
+          <Select cursor="pointer" size="sm" placeholder="Month" onChange={handleChangeMonth}>
+            <option value="All">All</option>
             {months.map((month, index) => (
               <option key={index} value={month}>
                 {month}
               </option>
             ))}
           </Select>
-          <Select cursor="pointer" size="sm" placeholder="Ano" value={year} onChange={handleChangeYear}>
+          <Select cursor="pointer" size="sm" placeholder="Year" value={year} onChange={handleChangeYear}>
             {years.map((year, index) => (
               <option key={index} value={year}>
                 {year}
               </option>
             ))}
           </Select>
-          <Select cursor="pointer" size="sm" placeholder="Ordem" value={order} onChange={(e) => setOrder(e.target.value)}>
+          <Select cursor="pointer" size="sm" placeholder="Order" value={order} onChange={(e) => setOrder(e.target.value)}>
             {orders.map((order, index) => (
               <option key={index} value={order}>
                 {order}

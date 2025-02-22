@@ -321,7 +321,7 @@ const CalendarioTable = React.memo(
       setApprovedAllDays((prevList) => [...prevList, ...allDaysToNotApprove]);
     };
 
-    const filteredMonths = useMemo(() => (selectedMonth === "Todos" ? months : [selectedMonth]), [selectedMonth]);
+    const filteredMonths = useMemo(() => (selectedMonth === "All" ? months : [selectedMonth]), [selectedMonth]);
 
     const filteredApproved = useMemo(
       () => daysApproved.filter((day) => new Date(day.dataInicio).getFullYear() === parseInt(selectedYear, 10)),
