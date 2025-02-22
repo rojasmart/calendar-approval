@@ -184,8 +184,8 @@ function App() {
         </ModalContent>
       </Modal>
 
-      <Flex p="6" borderRadius={"5px"} border={"1px solid #e9e9e9"} mb="4" justifyContent="space-between" gap="6">
-        <Box w="50%" display="flex" gap="4">
+      <Flex p="6" borderRadius={"5px"} border={"1px solid #e9e9e9"} mb="4" justifyContent="space-between" gap="6" direction={["column", "row"]}>
+        <Box w={["100", "50%"]} display="flex" gap="4">
           <Select cursor="pointer" size="sm" placeholder="Departamento" value={department} onChange={handleChangeDepartamento}>
             <option value="All">All</option>
             {departamentos.map((departamento) => (
@@ -217,7 +217,7 @@ function App() {
             ))}
           </Select>
         </Box>
-        <Box w="50%" display="flex" justifyContent="flex-end" gap="4">
+        <Box w={["100", "50%"]} display="flex" justifyContent={["flex-start", "flex-end"]} gap="4">
           <Button size="sm" colorScheme="gray" onClick={onToggle}>
             Caption
           </Button>
