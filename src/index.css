@@ -20,7 +20,7 @@
   height: 100%;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
   text-align: center;
 }
 
@@ -38,6 +38,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   width: 100%;
+  background-color: #EDF2F7!important;
 }
 
 h1 {

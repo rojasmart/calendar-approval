@@ -398,7 +398,7 @@ const CalendarioTable = React.memo(
               ))}
             </tr>
           </Thead>
-          <Tbody>
+          <Tbody backgroundColor={"white"}>
             {filteredFuncionarios &&
               filteredFuncionarios
                 .filter((f) => !f.inativo)
