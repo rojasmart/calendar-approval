@@ -14,7 +14,7 @@ const Menu = () => {
         right={4}
         isRound={true}
         variant="solid"
-        colorScheme="gray"
+        colorScheme="blue"
         aria-label="Settings"
         fontSize="20px"
         icon={<SettingsIcon />}
@@ -22,17 +22,6 @@ const Menu = () => {
       />
       <Center>
         <Card variant={"filled"} p={8} borderRadius="lg" maxWidth="600px">
-          <IconButton
-            alignSelf={"center"}
-            w="10px"
-            isRound={true}
-            variant="solid"
-            colorScheme="blue"
-            aria-label="Done"
-            fontSize="20px"
-            icon={<CalendarIcon />}
-            mb="5"
-          />
           <Heading size="lg" mb={4}>
             Calendar Approval
           </Heading>
