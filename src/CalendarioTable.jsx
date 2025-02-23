@@ -203,10 +203,10 @@ const CalendarCells = React.memo(({ month, setHoveredMonth, funcionarioId, filte
                       <PopoverArrow />
                       <PopoverCloseButton />
                       <PopoverHeader>
-                        <Heading fontSize="lg">Confirmação</Heading>
+                        <Heading fontSize="lg">Confirm</Heading>
                       </PopoverHeader>
-                      <PopoverBody>
-                        <Text fontSize="sm">Tem a certeza que isto e aquilo</Text>
+                      <PopoverBody whiteSpace="normal" wordBreak="break-word">
+                        <Text fontSize="sm">Are you sure you want to approve or not approve this day?</Text>{" "}
                       </PopoverBody>
                       <PopoverFooter>
                         <ButtonGroup size="sm">
@@ -219,7 +219,7 @@ const CalendarCells = React.memo(({ month, setHoveredMonth, funcionarioId, filte
                               handleApproveDay(matchedItem);
                             }}
                           >
-                            Aprovar
+                            Approve
                           </Button>
                           <Button
                             mt="2"
@@ -229,7 +229,7 @@ const CalendarCells = React.memo(({ month, setHoveredMonth, funcionarioId, filte
                               handleNotApproveDay(matchedItem);
                             }}
                           >
-                            Rejeitar
+                            Reject
                           </Button>
                         </ButtonGroup>
                       </PopoverFooter>
