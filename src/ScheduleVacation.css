@@ -1,0 +1,83 @@
+.vacation-scheduler {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .selection-mode {
+    margin-bottom: 20px;
+  }
+  
+  .selection-mode label {
+    margin-right: 20px;
+    cursor: pointer;
+  }
+  
+  .calendar-container {
+    margin-bottom: 20px;
+  }
+  
+  .vacation-calendar {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .selected-day {
+    background-color: #4caf50 !important;
+    color: white !important;
+    border-radius: 50%;
+  }
+  
+  .selected-dates {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+  
+  .selected-dates ul {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-left: 20px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .submit-button, .clear-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+  }
+  
+  .submit-button {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .submit-button:hover {
+    background-color: #45a049;
+  }
+  
+  .clear-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .clear-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
