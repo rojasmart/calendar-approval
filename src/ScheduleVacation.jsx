@@ -98,7 +98,7 @@ const ScheduleVacation = () => {
                 key={i}
                 onClick={() => !isDisabled && isCurrentMonth && handleDateChange(date)}
                 textAlign="center"
-                borderRadius="50%"
+                borderRadius="10%"
                 py={1}
                 cursor={isDisabled || !isCurrentMonth ? "default" : "pointer"}
                 bg={isSelected ? selectedDayBgColor : "transparent"}
@@ -107,6 +107,7 @@ const ScheduleVacation = () => {
                 _hover={!isDisabled && isCurrentMonth && !isSelected ? { bg: hoverBgColor } : {}}
                 transition="all 0.2s"
                 fontWeight={isSelected ? "bold" : "normal"}
+                fontSize={"xs"}
               >
                 {format(date, dateFormat)}
               </Box>
@@ -150,7 +151,7 @@ const ScheduleVacation = () => {
             gap={4}
           >
             {months.map((month, index) => (
-              <Box key={index} mb={2} borderRadius="md" p={2} boxShadow="sm" bg={calendarBgColor}>
+              <Box key={index} mb={2} borderRadius="md" border="1px solid #EDF2F7 " p={2} bg={calendarBgColor}>
                 <Calendar month={month} />
               </Box>
             ))}
@@ -180,7 +181,7 @@ const ScheduleVacation = () => {
                 ))}
             </List>
           ) : (
-            <Text mb={6} color="gray.500">
+            <Text fontSize="xs" mb={6} color="gray.400">
               No days selected yet. Click on the dates you'd like to take vacation.
             </Text>
           )}
