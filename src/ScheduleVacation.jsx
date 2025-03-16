@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { format, addMonths, getYear, setMonth } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isSameMonth, isAfter, parseISO } from "date-fns";
 import { Box, Button, Container, Flex, Grid, Heading, List, ListItem, Radio, RadioGroup, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 
 const ScheduleVacation = () => {
@@ -13,15 +11,19 @@ const ScheduleVacation = () => {
   const selectedDayBgColor = useColorModeValue("green.500", "green.300");
   const selectedDatesBoxBg = useColorModeValue("gray.50", "gray.700");
   const selectedDatesBorder = useColorModeValue("gray.200", "gray.600");
+  const dayBgColor = useColorModeValue("white", "gray.800");
+  const dayTextColor = useColorModeValue("gray.800", "gray.100");
+  const inactiveTextColor = useColorModeValue("gray.400", "gray.600");
+  const hoverBgColor = useColorModeValue("gray.100", "gray.600");
 
   const handleDateChange = (date) => {
     if (selectionMode === "single") {
       setSelectedDates([date]);
     } else {
       // Check if date already selected
-      if (selectedDates.some((d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd"))) {
+      if (selectedDates.some((d) => isSameDay(d, date))) {
         // Remove date if already selected
-        setSelectedDates(selectedDates.filter((d) => format(d, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")));
+        setSelectedDates(selectedDates.filter((d) => !isSameDay(d, date)));
       } else {
         // Add date if not selected
         setSelectedDates([...selectedDates, date]);
@@ -41,71 +43,82 @@ const ScheduleVacation = () => {
     setSelectedDates([]);
   };
 
-  // Generate array of months for the year
+  // Generate array of months for the current year
   const months = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setMonth(i);
-    return date;
+    return new Date(currentYear, i, 1);
   });
 
-  // Custom styles for the date pickers
-  const customDatePickerStyles = `
-  .react-datepicker {
-    font-family: inherit;
-    background-color: ${calendarBgColor};
-    border-radius: 0.375rem;
-    border: 1px solid ${selectedDatesBorder};
-    font-size: 0.8rem;
-    width: 100%;
-  }
-  .react-datepicker__month-container {
-    width: 100%;
-  }
-  .react-datepicker__header {
-    padding-top: 0.5rem;
-    font-size: 0.8rem;
-  }
-  .react-datepicker__current-month {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin-bottom: 0.4rem;
-  }
-  .react-datepicker__day-names {
-    margin-top: 0.3rem;
-  }
-  .react-datepicker__day, .react-datepicker__day-name {
-    width: 1.7rem;
-    height: 1.7rem;
-    line-height: 1.7rem;
-    margin: 0.1rem;
-    font-size: 0.8rem;
-  }
-  .react-datepicker__navigation {
-    top: 0.5rem;
-    height: 1.5rem;
-    width: 1.5rem;
-    display: none; /* Hide navigation within small calendars */
-  }
-  .selected-day {
-    background-color: ${selectedDayBgColor} !important;
-    color: white !important;
-    border-radius: 50%;
-  }
-  
-  /* Make it responsive on smaller screens */
-  @media (max-width: 768px) {
-    .react-datepicker__day, .react-datepicker__day-name {
-      width: 1.5rem;
-      height: 1.5rem;
-      line-height: 1.5rem;
-      font-size: 0.7rem;
-    }
-  }
-`;
+  // Calendar component for a single month
+  const Calendar = ({ month }) => {
+    const today = new Date();
+    const monthStart = startOfMonth(month);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart);
+    const endDate = endOfWeek(monthEnd);
+
+    const dateFormat = "d";
+    const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+    // Generate grid of days
+    const generateDays = () => {
+      let day = startDate;
+      const days = [];
+
+      while (day <= endDate) {
+        days.push(day);
+        day = addDays(day, 1);
+      }
+
+      return days;
+    };
+
+    const daysList = generateDays();
+
+    return (
+      <Box>
+        <Box textAlign="center" py={1} fontWeight="bold" fontSize="sm">
+          {format(month, "MMMM yyyy")}
+        </Box>
+
+        <Grid templateColumns="repeat(7, 1fr)" textAlign="center" fontSize="xs" fontWeight="semibold" mb={1}>
+          {daysOfWeek.map((day) => (
+            <Box key={day}>{day}</Box>
+          ))}
+        </Grid>
+
+        <Grid templateColumns="repeat(7, 1fr)" gap={1}>
+          {daysList.map((date, i) => {
+            const isCurrentMonth = isSameMonth(date, month);
+            const isSelected = selectedDates.some((selectedDate) => isSameDay(selectedDate, date));
+            const isPastDate = date < today && !isSameDay(date, today);
+            const isDisabled = isPastDate;
+
+            return (
+              <Box
+                key={i}
+                onClick={() => !isDisabled && isCurrentMonth && handleDateChange(date)}
+                textAlign="center"
+                borderRadius="50%"
+                py={1}
+                cursor={isDisabled || !isCurrentMonth ? "default" : "pointer"}
+                bg={isSelected ? selectedDayBgColor : "transparent"}
+                color={isSelected ? "white" : !isCurrentMonth ? inactiveTextColor : isDisabled ? inactiveTextColor : dayTextColor}
+                opacity={isDisabled || !isCurrentMonth ? 0.5 : 1}
+                _hover={!isDisabled && isCurrentMonth && !isSelected ? { bg: hoverBgColor } : {}}
+                transition="all 0.2s"
+                fontWeight={isSelected ? "bold" : "normal"}
+              >
+                {format(date, dateFormat)}
+              </Box>
+            );
+          })}
+        </Grid>
+      </Box>
+    );
+  };
 
   return (
     <Container maxW="1800px" py={8}>
-      <style>{customDatePickerStyles}</style>
       <Heading as="h2" mb={6} textAlign="center">
         Schedule Your Vacation
       </Heading>
@@ -137,27 +150,8 @@ const ScheduleVacation = () => {
             gap={4}
           >
             {months.map((month, index) => (
-              <Box key={index} mb={2}>
-                <DatePicker
-                  inline
-                  selected={null}
-                  onChange={handleDateChange}
-                  highlightDates={selectedDates}
-                  minDate={new Date()}
-                  showMonthYearPicker={false}
-                  showFullMonthYearPicker={false}
-                  showTwoColumnMonthYearPicker={false}
-                  openToDate={month}
-                  renderCustomHeader={({ date, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled }) => (
-                    <Box textAlign="center" py={1}>
-                      {format(date, "MMMM yyyy")}
-                    </Box>
-                  )}
-                  dayClassName={(date) =>
-                    selectedDates.some((d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")) ? "selected-day" : undefined
-                  }
-                  fixedHeight
-                />
+              <Box key={index} mb={2} borderRadius="md" p={2} boxShadow="sm" bg={calendarBgColor}>
+                <Calendar month={month} />
               </Box>
             ))}
           </Grid>
