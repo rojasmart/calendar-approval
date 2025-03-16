@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
-import { Box, Button, Container, Flex, Heading, List, ListItem, Radio, RadioGroup, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { format, addMonths, getYear, setMonth } from "date-fns";
+import { Box, Button, Container, Flex, Grid, Heading, List, ListItem, Radio, RadioGroup, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 
 const ScheduleVacation = () => {
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
+  const [currentYear] = useState(new Date().getFullYear());
 
   const calendarBgColor = useColorModeValue("white", "gray.700");
   const selectedDayBgColor = useColorModeValue("green.500", "green.300");
@@ -40,29 +41,74 @@ const ScheduleVacation = () => {
     setSelectedDates([]);
   };
 
-  // Custom styles for the date picker to work with Chakra UI
+  // Generate array of months for the year
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(i);
+    return date;
+  });
+
+  // Custom styles for the date pickers
   const customDatePickerStyles = `
-    .react-datepicker {
-      font-family: inherit;
-      background-color: ${calendarBgColor};
-      border-radius: 0.375rem;
-      border: 1px solid ${selectedDatesBorder};
+  .react-datepicker {
+    font-family: inherit;
+    background-color: ${calendarBgColor};
+    border-radius: 0.375rem;
+    border: 1px solid ${selectedDatesBorder};
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  .react-datepicker__month-container {
+    width: 100%;
+  }
+  .react-datepicker__header {
+    padding-top: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .react-datepicker__current-month {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+  }
+  .react-datepicker__day-names {
+    margin-top: 0.3rem;
+  }
+  .react-datepicker__day, .react-datepicker__day-name {
+    width: 1.7rem;
+    height: 1.7rem;
+    line-height: 1.7rem;
+    margin: 0.1rem;
+    font-size: 0.8rem;
+  }
+  .react-datepicker__navigation {
+    top: 0.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    display: none; /* Hide navigation within small calendars */
+  }
+  .selected-day {
+    background-color: ${selectedDayBgColor} !important;
+    color: white !important;
+    border-radius: 50%;
+  }
+  
+  /* Make it responsive on smaller screens */
+  @media (max-width: 768px) {
+    .react-datepicker__day, .react-datepicker__day-name {
+      width: 1.5rem;
+      height: 1.5rem;
+      line-height: 1.5rem;
+      font-size: 0.7rem;
     }
-    .selected-day {
-      background-color: ${selectedDayBgColor} !important;
-      color: white !important;
-      border-radius: 50%;
-    }
-  `;
+  }
+`;
 
   return (
-    <Container maxW="800px" py={8}>
+    <Container maxW="1800px" py={8}>
       <style>{customDatePickerStyles}</style>
-
       <Heading as="h2" mb={6} textAlign="center">
         Schedule Your Vacation
       </Heading>
-
       <Box mb={6}>
         <RadioGroup
           value={selectionMode}
@@ -78,39 +124,82 @@ const ScheduleVacation = () => {
         </RadioGroup>
       </Box>
 
-      <Box mb={6} p={4} borderRadius="md" boxShadow="sm" bg={calendarBgColor}>
-        <DatePicker
-          inline
-          selected={selectedDates[0]}
-          onChange={handleDateChange}
-          highlightDates={selectedDates}
-          minDate={new Date()}
-          dayClassName={(date) => (selectedDates.some((d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")) ? "selected-day" : undefined)}
-        />
-      </Box>
-
-      {selectedDates.length > 0 && (
-        <Box mb={6} p={4} borderRadius="md" bg={selectedDatesBoxBg} border="1px solid" borderColor={selectedDatesBorder}>
-          <Heading as="h3" size="md" mb={3}>
-            Selected Vacation Days ({selectedDates.length}):
-          </Heading>
-          <List spacing={2}>
-            {[...selectedDates]
-              .sort((a, b) => a - b)
-              .map((date, index) => (
-                <ListItem key={index}>{format(date, "EEEE, MMMM dd, yyyy")}</ListItem>
-              ))}
-          </List>
+      <Flex direction={{ base: "column", md: "row" }} gap={6} align="flex-start">
+        {/* Left side - All 12 months */}
+        <Box flex={{ base: "1", md: "9" }} p={4} borderRadius="md" boxShadow="lg" bg={calendarBgColor} overflow="hidden">
+          <Grid
+            templateColumns={{
+              base: "repeat(1, 1fr)",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+              lg: "repeat(4, 1fr)",
+            }}
+            gap={4}
+          >
+            {months.map((month, index) => (
+              <Box key={index} mb={2}>
+                <DatePicker
+                  inline
+                  selected={null}
+                  onChange={handleDateChange}
+                  highlightDates={selectedDates}
+                  minDate={new Date()}
+                  showMonthYearPicker={false}
+                  showFullMonthYearPicker={false}
+                  showTwoColumnMonthYearPicker={false}
+                  openToDate={month}
+                  renderCustomHeader={({ date, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled }) => (
+                    <Box textAlign="center" py={1}>
+                      {format(date, "MMMM yyyy")}
+                    </Box>
+                  )}
+                  dayClassName={(date) =>
+                    selectedDates.some((d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")) ? "selected-day" : undefined
+                  }
+                  fixedHeight
+                />
+              </Box>
+            ))}
+          </Grid>
         </Box>
-      )}
 
-      <Flex gap={4}>
-        <Button onClick={clearSelection} isDisabled={selectedDates.length === 0} colorScheme="red" flex="1">
-          Clear Selection
-        </Button>
-        <Button onClick={handleSubmit} isDisabled={selectedDates.length === 0} colorScheme="green" flex="1">
-          Submit Vacation Request
-        </Button>
+        {/* Right side - Selected dates and actions */}
+        <Box
+          flex={{ base: "1", md: "2" }}
+          p={4}
+          borderRadius="md"
+          bg={selectedDatesBoxBg}
+          border="1px solid"
+          borderColor={selectedDatesBorder}
+          boxShadow="md"
+        >
+          <Heading as="h3" size="md" mb={5}>
+            Selected Vacation Days ({selectedDates.length})
+          </Heading>
+
+          {selectedDates.length > 0 ? (
+            <List spacing={2} maxH="400px" overflowY="auto" mb={6}>
+              {[...selectedDates]
+                .sort((a, b) => a - b)
+                .map((date, index) => (
+                  <ListItem key={index}>{format(date, "EEEE, MMMM dd, yyyy")}</ListItem>
+                ))}
+            </List>
+          ) : (
+            <Text mb={6} color="gray.500">
+              No days selected yet. Click on the dates you'd like to take vacation.
+            </Text>
+          )}
+
+          <Stack spacing={4}>
+            <Button onClick={clearSelection} isDisabled={selectedDates.length === 0} colorScheme="red" width="full">
+              Clear Selection
+            </Button>
+            <Button onClick={handleSubmit} isDisabled={selectedDates.length === 0} colorScheme="green" width="full">
+              Submit Vacation Request
+            </Button>
+          </Stack>
+        </Box>
       </Flex>
     </Container>
   );
