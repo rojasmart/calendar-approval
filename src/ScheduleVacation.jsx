@@ -173,15 +173,43 @@ const ScheduleVacation = () => {
           </Heading>
 
           {selectedDates.length > 0 ? (
-            <List spacing={2} maxH="400px" overflowY="auto" mb={6}>
-              {[...selectedDates]
-                .sort((a, b) => a - b)
-                .map((date, index) => (
-                  <ListItem key={index}>{format(date, "EEEE, MMMM dd, yyyy")}</ListItem>
-                ))}
-            </List>
+            <Box maxH="400px" overflowY="auto" mb={6} borderRadius="md" border="1px solid" borderColor={selectedDatesBorder} p={2}>
+              <List spacing={1}>
+                {[...selectedDates]
+                  .sort((a, b) => a - b)
+                  .map((date, index) => (
+                    <ListItem
+                      key={index}
+                      p={2}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      bg={index % 2 === 0 ? "transparent" : useColorModeValue("gray.50", "gray.800")}
+                      borderRadius="md"
+                      _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+                    >
+                      <Flex alignItems="center">
+                        <Box mr={3} w="8px" h="8px" borderRadius="full" bg={selectedDayBgColor} />
+                        <Text fontSize="sm">{format(date, "EEEE, MMMM dd, yyyy")}</Text>
+                      </Flex>
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        colorScheme="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDates(selectedDates.filter((d) => !isSameDay(d, date)));
+                        }}
+                        aria-label="Remove date"
+                      >
+                        ✕
+                      </Button>
+                    </ListItem>
+                  ))}
+              </List>
+            </Box>
           ) : (
-            <Text fontSize="xs" mb={6} color="gray.400">
+            <Text fontSize="sm" mb={6} color="gray.500">
               No days selected yet. Click on the dates you'd like to take vacation.
             </Text>
           )}
