@@ -1,5 +1,6 @@
 # Calendar Approval
 ![Screenshot from 2025-02-22 19-06-22](https://github.com/user-attachments/assets/795b25fa-36be-4274-949e-c427a651ca43)
+![image](https://github.com/user-attachments/assets/bda3b112-154f-4de1-8bfd-3dd8e01e4466)
 ![Screenshot from 2025-02-22 19-06-42](https://github.com/user-attachments/assets/07442736-ce38-4cf2-b258-20c826c4e184)
 
 ## Project Overview
