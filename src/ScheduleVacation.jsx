@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isSameMonth } from "date-fns";
 import {
   Box,
@@ -15,8 +15,9 @@ import {
   Text,
   useColorModeValue,
   Icon,
+  IconButton,
 } from "@chakra-ui/react";
-import { CalendarIcon } from "@chakra-ui/icons";
+import { CalendarIcon, ArrowBackIcon } from "@chakra-ui/icons";
 
 const ScheduleVacation = () => {
   const [selectedDates, setSelectedDates] = useState([]);
@@ -134,6 +135,11 @@ const ScheduleVacation = () => {
     );
   };
 
+  const handleReturnHome = () => {
+    // Navigate to home page
+    window.location.href = "/"; // You can replace this with your routing method
+  };
+
   return (
     <Container maxW="1800px" py={8}>
       <Heading as="h2" mb={6} textAlign="center">
@@ -241,6 +247,9 @@ const ScheduleVacation = () => {
               Submit Vacation Request
             </Button>
           </Stack>
+          <Button mt="4" w="100%" colorScheme="blue" onClick={handleReturnHome}>
+            Return home
+          </Button>
         </Box>
       </Flex>
     </Container>
