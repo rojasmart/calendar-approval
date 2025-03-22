@@ -1,6 +1,22 @@
 import React, { useState } from "react";
-import { format, addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isSameMonth, isAfter, parseISO } from "date-fns";
-import { Box, Button, Container, Flex, Grid, Heading, List, ListItem, Radio, RadioGroup, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isSameMonth } from "date-fns";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Grid,
+  Heading,
+  List,
+  ListItem,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  useColorModeValue,
+  Icon,
+} from "@chakra-ui/react";
+import { CalendarIcon } from "@chakra-ui/icons";
 
 const ScheduleVacation = () => {
   const [selectedDates, setSelectedDates] = useState([]);
@@ -11,7 +27,7 @@ const ScheduleVacation = () => {
   const selectedDayBgColor = useColorModeValue("green.500", "green.300");
   const selectedDatesBoxBg = useColorModeValue("gray.50", "gray.700");
   const selectedDatesBorder = useColorModeValue("gray.200", "gray.600");
-  const dayBgColor = useColorModeValue("white", "gray.800");
+
   const dayTextColor = useColorModeValue("gray.800", "gray.100");
   const inactiveTextColor = useColorModeValue("gray.400", "gray.600");
   const hoverBgColor = useColorModeValue("gray.100", "gray.600");
@@ -121,7 +137,10 @@ const ScheduleVacation = () => {
   return (
     <Container maxW="1800px" py={8}>
       <Heading as="h2" mb={6} textAlign="center">
-        Schedule Your Vacation
+        <Flex align="center" justify="center">
+          <Icon as={CalendarIcon} mr={2} color={selectedDayBgColor} />
+          Schedule Your Vacation
+        </Flex>
       </Heading>
       <Box mb={6}>
         <RadioGroup
