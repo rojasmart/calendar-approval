@@ -16,6 +16,9 @@ import {
   useColorModeValue,
   Icon,
   IconButton,
+  Switch,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { CalendarIcon, ArrowBackIcon } from "@chakra-ui/icons";
 
@@ -23,6 +26,12 @@ const ScheduleVacation = () => {
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
   const [currentYear] = useState(new Date().getFullYear());
+
+  const [userInfo] = useState({
+    name: "John Doe",
+    availableHours: 120,
+    usedHours: 16,
+  });
 
   const calendarBgColor = useColorModeValue("white", "gray.700");
   const selectedDayBgColor = useColorModeValue("green.500", "green.300");
@@ -142,25 +151,29 @@ const ScheduleVacation = () => {
 
   return (
     <Container maxW="1800px" py={8}>
-      <Heading as="h2" mb={6} textAlign="center">
-        <Flex align="center" justify="center">
+      <Heading as="h2" size="md" mb={6} textAlign="center">
+        <Flex align="center" justify="flex-start">
           <Icon as={CalendarIcon} mr={2} color={selectedDayBgColor} />
           Schedule Your Vacation
         </Flex>
       </Heading>
       <Box mb={6}>
-        <RadioGroup
-          value={selectionMode}
-          onChange={(value) => {
-            setSelectionMode(value);
-            setSelectedDates([]);
-          }}
-        >
-          <Stack direction="row" spacing={5}>
-            <Radio value="single">Single Day</Radio>
-            <Radio value="multiple">Multiple Days</Radio>
-          </Stack>
-        </RadioGroup>
+        <FormControl display="flex" alignItems="center">
+          <FormLabel htmlFor="selection-mode" mb="0" fontSize="sm">
+            {selectionMode === "single" ? "Single Day" : "Multiple Days"}
+          </FormLabel>
+          <Switch
+            id="selection-mode"
+            colorScheme="green"
+            size="md"
+            isChecked={selectionMode === "multiple"}
+            onChange={(e) => {
+              const newMode = e.target.checked ? "multiple" : "single";
+              setSelectionMode(newMode);
+              setSelectedDates([]);
+            }}
+          />
+        </FormControl>
       </Box>
 
       <Flex direction={{ base: "column", md: "row" }} gap={6} align="flex-start">
@@ -193,9 +206,40 @@ const ScheduleVacation = () => {
           borderColor={selectedDatesBorder}
           boxShadow="md"
         >
-          <Heading as="h3" size="md" mb={5}>
-            Selected Vacation Days ({selectedDates.length})
-          </Heading>
+          <Box mb={6} p={4} borderRadius="md" bg={useColorModeValue("white", "gray.800")} border="1px solid" borderColor={selectedDatesBorder}>
+            <Flex direction="column" gap={3}>
+              <Flex justify="space-between" align="center">
+                <Text fontWeight="bold">Employee:</Text>
+                <Text>{userInfo.name}</Text>
+              </Flex>
+
+              <Flex justify="space-between" align="center">
+                <Text fontWeight="bold">Available Hours:</Text>
+                <Text>{userInfo.availableHours} hours</Text>
+              </Flex>
+
+              <Flex justify="space-between" align="center">
+                <Text fontWeight="bold">Hours Used:</Text>
+                <Text>{userInfo.usedHours} hours</Text>
+              </Flex>
+
+              <Flex justify="space-between" align="center">
+                <Text fontWeight="bold">Balance:</Text>
+                <Text fontWeight="bold" color="green.500">
+                  {userInfo.availableHours - userInfo.usedHours} hours
+                </Text>
+              </Flex>
+
+              <Box mt={2} pt={2} borderTop="1px solid" borderColor={selectedDatesBorder}>
+                <Flex justify="space-between" align="center">
+                  <Text fontWeight="bold">Current Request:</Text>
+                  <Text fontWeight="bold" color={selectedDates.length * 8 > userInfo.availableHours - userInfo.usedHours ? "red.500" : "green.500"}>
+                    {selectedDates.length * 8} hours ({selectedDates.length} days)
+                  </Text>
+                </Flex>
+              </Box>
+            </Flex>
+          </Box>
 
           {selectedDates.length > 0 ? (
             <Box maxH="400px" overflowY="auto" mb={6} borderRadius="md" border="1px solid" borderColor={selectedDatesBorder} p={2}>
