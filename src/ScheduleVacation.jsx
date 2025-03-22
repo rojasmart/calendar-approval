@@ -150,8 +150,8 @@ const ScheduleVacation = () => {
   };
 
   return (
-    <Container maxW="1800px" py={8}>
-      <Heading as="h2" size="md" mb={6} textAlign="center">
+    <Container maxW="1800px" py={2}>
+      <Heading as="h2" size="md" mb={2} textAlign="center">
         <Flex align="center" justify="flex-start">
           <Icon as={CalendarIcon} mr={2} color={selectedDayBgColor} />
           Schedule Your Vacation
