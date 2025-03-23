@@ -9,18 +9,15 @@ import {
   Heading,
   List,
   ListItem,
-  Radio,
-  RadioGroup,
   Stack,
   Text,
   useColorModeValue,
   Icon,
-  IconButton,
   Switch,
   FormControl,
   FormLabel,
 } from "@chakra-ui/react";
-import { CalendarIcon, ArrowBackIcon } from "@chakra-ui/icons";
+import { CalendarIcon } from "@chakra-ui/icons";
 
 const ScheduleVacation = () => {
   const [selectedDates, setSelectedDates] = useState([]);

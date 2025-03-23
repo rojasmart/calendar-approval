@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 
-import { normalizeName } from "./Utils";
+import { normalizeName } from "../Utils";
 import {
   Popover,
   PopoverTrigger,
