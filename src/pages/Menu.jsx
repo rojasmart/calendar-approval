@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Center, Heading, Stack, Text, Card, IconButton, Box } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { ArrowForwardIcon, CalendarIcon, SettingsIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, SettingsIcon } from "@chakra-ui/icons";
 
 const Menu = () => {
   const navigate = useNavigate();

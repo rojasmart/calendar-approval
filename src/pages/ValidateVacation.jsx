@@ -1,4 +1,4 @@
-import "./index.css";
+import "../index.css";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   Flex,
@@ -18,11 +18,11 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import { normalizeName } from "./Utils";
+import { normalizeName } from "../Utils";
 
-import CalendarioTable from "./CalendarioTable";
-import QuadroAprovacoes from "./QuadroAprovacoes";
-import LegendaCores from "./LegendaCores";
+import CalendarioTable from "../components/CalendarioTable";
+import QuadroAprovacoes from "../components/QuadroAprovacoes";
+import LegendaCores from "../components/LegendaCores";
 
 const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; // Example months
 const years = [2021, 2022, 2023, 2024, 2025]; // Example years

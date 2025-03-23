@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Menu from "./Menu";
-import ScheduleVacation from "./ScheduleVacation";
-import ValidateVacation from "./ValidateVacation";
+import Menu from "./pages/Menu";
+import ScheduleVacation from "./pages/ScheduleVacation";
+import ValidateVacation from "./pages/ValidateVacation";
 
 function App() {
   return (
